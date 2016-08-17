@@ -8,12 +8,17 @@
 #include <section.h>
 #include <glob.h>
 
-
-#define _switch_to_first_bottom_half() \
+/*
+*jump to ret_with_schedule() and switch to user mode,run current
+*(maybe with schedule())
+*/
+#define switch_to_context() \
 	__asm__ __volatile__(\
 		"movl %0,%%esp\n\t"\
 		"jmp *%1\n\t"\
 		::"r"(current->thread.esp),"r"(current->thread.eip));
+
+
 		
 void __init start_kernel(void)
 {
@@ -27,6 +32,6 @@ void __init start_kernel(void)
 		kb_init();
 		pci_init();
 		hd_init();
-		_switch_to_first_bottom_half();
-		schedule();
+		switch_to_context();
 }
+

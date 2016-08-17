@@ -36,16 +36,22 @@ idle1:
 	goto idle1;
 }
 
-static void try_task()
+static void init_task()
 {
-	unsigned char buf[12];
-	int file,size,i;
+	unsigned char buf[50];
+	int file,size,i,j;
 	fs_check();
-	file=fopen("MAIN.S");
+	file=fopen("HD.C");
 	if(file==-1)goto idle2;
-	size=fread(buf,12,1,file);
-	/*for(i=0;i<12;i++)
-		printk("%c",*(buf+i));*/
+	/*for(j=0;j<=10;j++)
+	{
+		size=fread(buf,50,1,file);
+		for(i=0;i<50;i++)
+		{
+			if(*(buf+i)!=0x0D)
+				printf("%c",*(buf+i));
+		}
+	}*/
 	mem_show();
 idle2:
 	/*fread(buf,512,36);*/
@@ -154,8 +160,8 @@ struct tasktab
 	int	stksize;
 } tasktab[NR_TASK]={\
 {idle_task,100},\
-{idle_task2,5*500},\
-{try_task,10*500}};
+{init_task,10*500},\
+{idle_task2,5*500}};
 
 
 /*when create a new process,setup its kernel thread*/

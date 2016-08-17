@@ -52,6 +52,7 @@ ENTRY(save)
 	call	do_IRQ
 
 ret_from_int:	
+	cli
 	movb	CS(%esp),%bl
 	testb	$3,%bl			/*switch to kernel?? */
 	je	restore_all
@@ -88,9 +89,9 @@ ENTRY(system_call)
 	addl	$4*5,%esp
 	
 	movl	%eax,EAX(%esp)		/*return value to user process	*/
-	cli
 /*now!inturrpt is disabled*/
 ENTRY(ret_with_schedule)	
+	cli
 	movl	current,%ebp
 	cmpl	$0,(%ebp)
 	je	restore_all

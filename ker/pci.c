@@ -163,10 +163,7 @@ static void __init pci_scan_device(struct pci_dev * temp)
 		return;
 	}
 	/* else setup a pci device */
-	/*rep_movsb(temp,dev,sizeof(struct pci_dev));*/
-	dev->bus=temp->bus;
-	dev->device=temp->device;
-	dev->func=temp->func;
+	memcpy(temp,dev,sizeof(struct pci_dev));
 	dev->vendor=id & 0xFFFF;
 	dev->deviceid=(id >> 16) & 0xFFFF;
 	pci_in_dword(temp,PCI_CLASS,&class);

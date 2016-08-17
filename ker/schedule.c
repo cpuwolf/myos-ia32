@@ -18,7 +18,7 @@
 		"pushl %%edi\n\t"\
 		"pushl %%ebp\n\t"\
 		"movl %%esp,%0\n\t"		/*save esp in curr thread_struct*/\
-		"movl %2,%%esp\n\t"		/*restore esp from next thread_struct*/\
+		"movl %2,%%esp\n\t"		/*switch to kernel stack of next ,restore esp from next thread_struct*/\
 		"movl $1f,%1\n\t"		/*save eip in curr thread_struct*/\
 		"pushl %3\n\t"			/*save retaddr in next stack*/\
 		"jmp _switch_to\n\t"	/*jmp! funy*/\
@@ -31,7 +31,10 @@
 		:"m"(next->thread.esp),"m"(next->thread.eip),\
 		"a"(curr),"d"(next),"b"(curr));
 		
-/*pass param by registers*/		
+/*
+prepare switch to next process,load LDT
+pass param by registers
+*/		
 void FASTCALL _switch_to(struct proc * curr,struct proc *next)
 {
 	tss.esp0=next->thread.esp0;

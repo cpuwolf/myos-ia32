@@ -114,7 +114,7 @@ static int command(struct ide_drive * wn,struct command * cmd)
 static void do_readwrite(struct ide_drive * wn,struct request * rq)
 {
 	while(!getstate(wn,STATUS_BUSY|STATUS_READY|STATUS_ERR,STATUS_READY))printk("controller not ready!\n");
-	printk("DUMP:disk:%d b:%d n:%d buf:%d\n",wn->mainid,rq->block,rq->count,(u32_t)rq->buf);
+	/*printk("DUMP:disk:%d b:%d n:%d buf:%d\n",wn->mainid,rq->block,rq->count,(u32_t)rq->buf);*/
 	out_byte(wn->base+REG_CONTROL,wn->ctl);
 	
 	out_byte(wn->base+REG_COUNT,rq->count);
@@ -133,13 +133,45 @@ static void do_readwrite(struct ide_drive * wn,struct request * rq)
 		out_byte(wn->base+REG_COMMAND,CMD_WRITE);
 	
 }
+
+
+static int lba_cap_ok(struct deviceid * id)
+{
+	unsigned long lba_sects, chs_sects;
+	
+	if((id->cylinders==16383 ||(id->cylinders==4092 && id->lcylinders==16383))\
+	&& id->sectors==63 \
+	&& (id->heads==15||id->heads==16)\
+	&& id->lba_capacity >= 16383*63*id->heads)
+		return 1;
+		
+	lba_sects   = id->lba_capacity;
+	chs_sects   = id->cylinders * id->heads * id->sectors;
+	
+	/* perform a rough sanity check on lba_sects:  within 10% is OK */
+	if ((lba_sects - chs_sects) < chs_sects/10)
+		return 1;
+		
+	return 0;
+}
+
+static void calc_capacity(struct deviceid * d,struct ide_drive * wn)
+{
+	unsigned long cap=d->cylinders * d->heads * d->sectors;
+	
+	if((d->method & 2)&&lba_cap_ok(d))
+	{
+		cap=d->lba_capacity;
+	}
+	wn->capacity=cap;
+}
 static int hd_specify(struct ide_drive * wn)
 {
 	int i,r;
-	/*port check*/
-	unsigned char dmabuf[512];
+	char * dmabuf;
 	unsigned char id_string[40];
 	struct command cmd;
+	struct deviceid * devidp;
 	r=in_byte(wn->base+REG_CYL_LOW);
 	out_byte(wn->base+REG_CYL_LOW,~r);
 	if(in_byte(wn->base+REG_CYL_LOW)==r)
@@ -153,30 +185,41 @@ static int hd_specify(struct ide_drive * wn)
 	cmd.command=CMD_IDENTIFY;
 	command(wn,&cmd);
 	while(!getstate(wn,STATUS_DTRQ|STATUS_BUSY|STATUS_ERR,STATUS_DTRQ));
+	dmabuf=(char *)kmalloc(512);
+	if(dmabuf==NULL)
+		return 0;
 	in_words(wn->base+REG_DATA,dmabuf,256);
+	devidp=(struct deviceid *)dmabuf;
 	for(i=0;i<40;i++)
 	{
-		id_string[i]=(((struct deviceid *)dmabuf)->model)[i^1];
+		id_string[i]=(devidp->model)[i^1];
 		if(id_string[i]==' ')id_string[i]=0;
 	}
 	id_string[39]=0;
-	wn->pcylinders=((struct deviceid *)dmabuf)->cylinders;
-	wn->pheads=((struct deviceid *)dmabuf)->heads;
-	wn->psectors=((struct deviceid *)dmabuf)->sectors;
-	wn->lcylinders=((struct deviceid *)dmabuf)->lcylinders;
-	wn->lheads=((struct deviceid *)dmabuf)->lheads;
-	wn->lsectors=((struct deviceid *)dmabuf)->lsectors;
-	wn->max_multsect=((struct deviceid *)dmabuf)->max_multsect;
-	wn->dword_io=((struct deviceid *)dmabuf)->dword_io;
-	wn->buf_size=((struct deviceid *)dmabuf)->buf_size;
+	wn->pcylinders=devidp->cylinders;
+	wn->pheads=devidp->heads;
+	wn->psectors=devidp->sectors;
+	wn->lcylinders=devidp->lcylinders;
+	wn->lheads=devidp->lheads;
+	wn->lsectors=devidp->lsectors;
+	wn->max_multsect=devidp->max_multsect;
+	wn->dword_io=devidp->dword_io;
+	wn->buf_size=devidp->buf_size;
+	calc_capacity(devidp,wn);
+	kfree(dmabuf);
 	printk("ide0:%s DWordIO:%d bufsize:%d",id_string,wn->dword_io,wn->buf_size);
-	if((((struct deviceid *)dmabuf)->method)&0x0200)
+	if((devidp->method)&2)
 	{
 		wn->lba=1;
 		printk("[LBA]\n");
 	}else wn->lba=0;
 	printk("cy:%d head:%d sec:%d mult_sect:%d\n",wn->pcylinders,wn->pheads,wn->psectors,wn->max_multsect);
-	printk("lcy:%d lhead:%d lsec:%d comp:%d\n",wn->lcylinders,wn->lheads,wn->lsectors,wn->precomp);
+	printk("lcy:%d lhead:%d lsec:%d comp:%d tot_sec:%d\n",\
+	wn->lcylinders,\
+	wn->lheads,\
+	wn->lsectors,\
+	wn->precomp,\
+	wn->capacity);
 	
 	return 1;
 }
@@ -194,8 +237,8 @@ void __init hd_init()
 	wn=&wini[1];
 	wn->irq=15;
 	wn->base=REG_BASE1;
-	rep_movsb((void *)0x475,&numberdevice,1);
-	rep_movsb((void *)(0x41*4),BIOS,16);
+	memcpy((void *)0x475,&numberdevice,1);
+	memcpy((void *)(0x41*4),BIOS,16);
 	wn=&wini[0];
 	wn->lcylinders=*(u16_t *)BIOS;
 	wn->lheads=*(BIOS+2);

@@ -65,35 +65,40 @@
 
 struct deviceid
 {
-	u16_t config;
-	u16_t cylinders;
-	u16_t pres0;
-	u16_t heads;
-	u16_t track_bytes;
-	u16_t sector_bytes;
-	u16_t sectors;
-	u16_t vendor0;
-	u16_t vendor1;
-	u16_t vendor2;
-	u8_t sn[20];
-	u16_t controller_type;
-	u16_t buf_size;
-	u16_t ecc;
-	u8_t fw_rev[8];
-	u8_t model[40];
-	u16_t max_multsect;
-	u16_t dword_io;
-	u16_t method;
-	u16_t pres2;
-	u16_t tPIO;
-	u16_t tDMA;
-	u16_t field;
-	u16_t lcylinders;
-	u16_t lheads;
-	u16_t lsectors;
-	u32_t lcapacity;
-	u16_t multisect;
-	u32_t lba_capacity;
+	u16_t	config;
+	u16_t	cylinders;	/* "physical" cyls */
+	u16_t	pres0;
+	u16_t	heads;		/* "physical" heads */
+	u16_t	track_bytes;	/* unformatted bytes per track */
+	u16_t	sector_bytes;	/* unformatted bytes per sector */
+	u16_t	sectors;		/* "physical" sectors per track */
+	u16_t	vendor0;
+	u16_t	vendor1;
+	u16_t	vendor2;
+	u8_t	sn[20];
+	u16_t	controller_type;
+	u16_t	buf_size;
+	u16_t	ecc;
+	u8_t	fw_rev[8];
+	u8_t	model[40];
+	u8_t	max_multsect;
+	u8_t	vendor3;
+	u16_t	dword_io;
+	u8_t	vendor4;
+	u8_t	method;		/* bits 0:DMA 1:LBA 2:IORDYsw 3:IORDYsup*/
+	u16_t	presv50;
+	u8_t	vendor5;
+	u8_t	tPIO;
+	u8_t	vendor6;
+	u8_t	tDMA;
+	u16_t	field;
+	u16_t	lcylinders;	/* logical cylinders */
+	u16_t	lheads;		/* logical heads */
+	u16_t	lsectors;		/* logical sectors per track */
+	u32_t	lcapacity;	/* logical total sectors on drive */
+	u8_t	multisect;	/* current multiple sector count */
+	u8_t	multsect_valid;
+	u32_t	lba_capacity;	/* total number of sectors */
 };
 
 struct ide_drive
@@ -105,6 +110,7 @@ struct ide_drive
 	unsigned pcylinders;
 	unsigned pheads;
 	unsigned psectors;
+	unsigned capacity;
 	unsigned lcylinders;
 	unsigned lheads;
 	unsigned lsectors;

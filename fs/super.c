@@ -9,7 +9,7 @@
 
 struct super_block super_block;
 
-inline static unsigned int firstsectorofcluster(struct super_block * bd,unsigned int n)
+inline static unsigned int FstSecofDataClu(struct super_block * bd,unsigned int n)
 {
 	return ((n-2)*bd->cluster_size)+bd->data_first_sec;
 }
@@ -57,7 +57,7 @@ static void get_super(unsigned char * buf,struct super_block * bd)
 	else 
 	{
 		bd->type=3;/*fat32*/
-		bd->dir_first_sec=firstsectorofcluster(bd,bs->u.fat32.rootclus);
+		bd->dir_first_sec=FstSecofDataClu(bd,bs->u.fat32.rootclus);
 	}
 	/*type have been determined*/
 	printk("File System:Fat%d\n",fat_t[bd->type-1]);

@@ -15,7 +15,7 @@
 #define	NR_HOLE		30
 
 #define	PAGE_SIZE	1024
-#define	NR_PAGES		30
+#define	NR_PAGES		128
 
 #define	PAGE_S_CONT	(~0)
 #define	PAGE_S_FREE	0
@@ -168,9 +168,10 @@ inline static unsigned int calc_count(unsigned int size)
 void * kmalloc(unsigned int size)
 {
 	int count,tmp_c=0,a_flag=0;
+	unsigned int flags;
 	kpage_t * pptr=kmem_page,*free_h=kmem_page;
 	count=calc_count(size);
-	
+	lock_irq_save(flags);
 	for(; pptr<=(kmem_page+NR_PAGES) ;pptr++)
 	{
 		if(*pptr==PAGE_S_FREE)
@@ -194,7 +195,7 @@ void * kmalloc(unsigned int size)
 			return (void *)((unsigned)kmem_base+(free_h-kmem_page)*PAGE_SIZE);
 		}
 	}
-		
+	unlock_irq_restore(flags);
 	return NULL;
 }
 
@@ -202,7 +203,8 @@ void kfree(void * base)
 {
 	int index;
 	kpage_t *start=kmem_page,*end=kmem_page,*tmp;
-	
+	unsigned int flags;
+	lock_irq_save(flags);
 	index=((unsigned int)base-(unsigned int)kmem_base)/PAGE_SIZE;
 	start=kmem_page+index;
 	end=start+calc_count(*start);
@@ -223,7 +225,8 @@ void kfree(void * base)
 	{
 		if(*(end+1)==PAGE_S_FREE)
 			*(end+1)=PAGE_S_CONT;
-	}	
+	}
+	unlock_irq_restore(flags);	
 }
 
 

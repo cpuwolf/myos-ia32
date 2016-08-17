@@ -23,7 +23,7 @@ typedef struct console
 	int c_col;
 }console_t;
 
-console_t cons;
+static console_t cons;
 
 void __init scr_init()
 {
@@ -34,15 +34,15 @@ void __init scr_init()
 }
 void scroll_screen(console_t * con)
 {
-	rep_movsw((char *)(con->c_org+80*2),(char *)(con->c_org),80*24);
-	rep_stosw(0,(char *)(con->c_org+80*24*2),80);
+	memcpy((char *)(con->c_org+80*2),(char *)(con->c_org),80*24*2);
+	memset((char *)(con->c_org+80*24*2),0,80*2);
 }
 void char_out(console_t * con,char c,unsigned char color)
 {
 		unsigned char buf[2];
 		buf[0]=c;
 		buf[1]=color;
-        	rep_movsw(buf,(char *)(con->c_org+160*con->c_row+con->c_col*2),1);
+        	memcpy(buf,(char *)(con->c_org+160*con->c_row+con->c_col*2),2);
 }
 inline static char atoi(int d)
 {

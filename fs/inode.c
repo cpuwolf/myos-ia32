@@ -7,6 +7,7 @@
 #include <hd.h>
 #include <proto.h>
 #include <slot.h>
+#include <system.h>
 
 #define INODE_NR 20
 
@@ -105,15 +106,13 @@ void read_map(struct inode * ip)
 	int blk_size,count=0,i=0;
 	
 	blk_size=(ip->i_sb->cluster_size)*(ip->i_sb->sector_size);
-	count=(ip->size)/blk_size;
-	if((ip->size%blk_size)>0)count++;
+	count=do_cdiv(ip->size,blk_size);
+	/*if((ip->size%blk_size)>0)count++;*/
 	index=ip->block[0];
-	printk("file ocuppy %d cluster\n",count);
 	do
 	{
 		ip->block[i++]=index;
 		index=FATEntryVal(ip->i_sb,index);
-		printk("index:0x%x\n",index);
 	}while((!eeof(ip->i_sb,index))&&(count-->0));
 	
 }

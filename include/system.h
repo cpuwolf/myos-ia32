@@ -22,30 +22,33 @@
 #define lock_irq_save(x) __asm__ __volatile__("pushfl;popl %0;cli":"=g"(x))
 #define unlock_irq_restore(x) restore_flags(x)
 
-#define save_halt() __asm__ __volatile__("sti;hlt")
 
 
-
+#define memcpy(f,t,n) rep_movsb((f),(t),(n))
+#define memset(s,c,num) rep_stosb((c),(s),(num))
 
 /*bytes copy*/
 extern inline void rep_movsb(void *from, void *to,int bytes)
 {
-  	__asm__ __volatile__ ("rep;movsb\n\t"::"c" (bytes), "D" ((unsigned)to), "S" ((unsigned)from));
-}
-/*words copy*/
-extern inline void rep_movsw(void * src,void * dest,int words)
-{
-	__asm__ __volatile__("cld\n\t" "rep ; movsw"::"S" ((unsigned)src),"D" ((unsigned)dest),"c" (words));
-}
-/* dwords copy*/
-extern inline void rep_movsl(void *from, void *to, unsigned dwords)
-{
-	__asm__ __volatile__ ("rep;movsl\n\t"::"c" (dwords), "D" (to), "S" (from));
+	int d0,d1,d2;
+  	__asm__ __volatile__ (\
+  	"cld\n\t"\
+  	"rep;movsb\n\t"
+  	:"=c"(d0),"=D"(d1),"=S"(d2)\
+  	:"0" (bytes), "1" ((unsigned)to), "2" ((unsigned)from)\
+  	:"memory");
 }
 
-extern inline void rep_stosw(int value,void * dest,int numwords)
+
+/*memset*/
+extern inline void rep_stosb(int value,void * dest,int numwords)
 {
-	__asm__ __volatile__("cld\n\t" "rep ; stosw"::"a" (value),"D" ((unsigned)dest),"c" (numwords));
+	int d1,d2;
+	__asm__ __volatile__(\
+	"cld\n\t"\
+	"rep ; stosb\n\t"\
+	:"=D"(d1),"=c"(d2)\
+	:"a" (value),"0" ((unsigned)dest),"1" (numwords));
 }
 
 
@@ -112,7 +115,7 @@ extern inline int find_zero_bit(unsigned int * p)
 		:"r"(~(*p)));
 	return index;
 }
-
+/*set nr bit in *p,*p is a 32-bit Unit*/
 extern inline void set_bit(unsigned int * p,int nr)
 {
 	__asm__ __volatile__(\
@@ -120,5 +123,29 @@ extern inline void set_bit(unsigned int * p,int nr)
 	:"=m"(*p)\
 	:"Ir"(nr)\
 	);
+}
+/*reset nr bit in *p,*p is a 32-bit Unit*/
+extern inline void clear_bit(unsigned int * p,int nr)
+{
+	__asm__ __volatile__(\
+	"btrl %1,%0"\
+	:"=m"(*p)\
+	:"Ir"(nr)\
+	);
+}
+
+extern inline unsigned int do_cdiv(unsigned int s,unsigned int d)
+{
+	unsigned int q,r;
+	__asm__ __volatile__(\
+	"div %2\n\t"\
+	"testl %%edx,%%edx\n\t"\
+	"je 1f\n\t"\
+	"incl %%eax\n\t"\
+	"1:\n\t"
+	:"=a"(q),"=d"(r)\
+	:"0"(s),"r"(d),"1"(0)\
+	);
+	return q;
 }
 #endif
