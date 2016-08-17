@@ -44,90 +44,16 @@ void char_out(console_t * con,char c,unsigned char color)
 		buf[1]=color;
         	memcpy(buf,(char *)(con->c_org+160*con->c_row+con->c_col*2),2);
 }
-inline static char atoi(int d)
-{
-		return d+48;
-}
-inline static char atoihex(int d)
-{
-	if(d<=9)return '0'+d;
-	else return 'a'+d-10;
-}
+
 static void set_cur(int cur)
 {
-	out_byte(UDV_BASE,14);
-	out_byte(UDV_BASE+1,(cur>>8)&0xff);
-	out_byte(UDV_BASE,15);
-	out_byte(UDV_BASE+1,cur&0xff);
+	outb(UDV_BASE,14);
+	outb(UDV_BASE+1,(cur>>8)&0xff);
+	outb(UDV_BASE,15);
+	outb(UDV_BASE+1,cur&0xff);
 }
 
 
-				
-static char * int_to_str(char * s,unsigned int d)
-{
-	unsigned int y,i=0,j;
-	char tmp;
-	if(d==0)
-	{
-		s[0]='0';
-		s[1]=0;
-		s++;
-		return s;	
-	}
-	else
-	{
-		while(d>=1)
-		{
-				y=d%10;
-				d=d/10;
-				s[i++]=atoi(y);
-		}
-		i--;
-		for(j=0;j<=i/2;j++)
-		{
-				tmp=s[i-j];
-				s[i-j]=s[j];
-				s[j]=tmp;
-		}
-		s+=i;
-		s++;
-		return s;
-	}
-}
-
-static char * int_to_hexstr(char * s,unsigned int d)
-{
-	unsigned int y,i=0,j;
-	char tmp;
-	if(d==0)
-	{
-		s[0]='0';
-		s[1]=0;
-		s++;
-		return s;	
-	}
-	else
-	{
-		j=0;
-		while(d>=1)
-		{
-				y=d&0xf;
-				s[i++]=atoihex(y);
-				d>>=4;
-				j++;
-		}
-		i--;
-		for(j=0;j<=i/2;j++)
-		{
-				tmp=s[i-j];
-				s[i-j]=s[j];
-				s[j]=tmp;
-		}
-		s+=i;
-		s++;
-		return s;
-	}
-}
 static void scroll_check()
 {
 	if(cons.c_col>=80)
@@ -172,44 +98,7 @@ void tty_write(char * s)
 	cons_echo(umap(current,s));
 }
 
-/*used by user process and kernel */
-void vsprintf(char * buf,const char * fmt, va_list args)
-{
-		char * str;
-		unsigned char *tmp;
-		for(str=buf;*fmt;++fmt)
-		{
-				if(*fmt!='%')
-				{		
-						*str=*fmt;
-						str++;
-						continue;
-				}
-				fmt++;
-				switch(*fmt)
-				{
-				case 'c':	
-						*str=(unsigned char)(va_arg(args,int)&0xff);
-						str++;
-						break;
-				case 'd':
-						str=int_to_str(str,va_arg(args,unsigned int));
-						break;
-				case 'x':
-						str=int_to_hexstr(str,va_arg(args,unsigned int));
-						break;
-				case 's':
-						for(tmp=va_arg(args,unsigned char *);*tmp;tmp++,str++)
-						{
-							*str=*tmp;		
-						}
-						break;
-						
-				default:
-				}
-		}
-		*str=0;
-}
+
 void printk(const char * fmt, ...)
 {
 		char stack[STACK_SIZE];/*alloc in stack*/

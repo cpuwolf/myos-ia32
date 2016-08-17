@@ -15,7 +15,7 @@ struct buf * get_block(int block,int size)
 	bp=(struct buf *)kmalloc(sizeof(struct buf));
 	bp->data=(char *)kmalloc(size);
 	if(bp==NULL)return NULL;
-	ide_read(bp->data,size,block);
+	bread(bp->data,size,block);
 	return bp;
 }
 

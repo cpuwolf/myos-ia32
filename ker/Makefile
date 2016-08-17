@@ -3,9 +3,9 @@
 
 all: kernel.o
  
-OBJPRO=cpu.o console.o sys.o protect.o \
-irq.o kb.o clock.o hd.o system.o proc.o pci.o lib.o mem.o \
-schedule.o  partition.o 
+OBJPRO=cpu.o console.o vsprintf.o sys.o protect.o \
+irq.o trap.o kb.o clock.o hd.o system.o proc.o pci.o mem.o \
+schedule.o  partition.o panic.o exit.o fork.o 
 
 kernel.o: $(OBJPRO) 
 	rm -f $@

@@ -70,7 +70,10 @@ static void free_slot(struct hole * h)	/*like free*/
 void * Kmem_alloc(unsigned int size)
 {
 	struct hole * i,*t;
+	unsigned int flags;
 	if(size==0)return 0;
+	
+	lock_irq_save(flags);
 	for(i=h_head;i!=NULL;i=i->next)
 	{
 		if(i->status==STAT_FREE)
@@ -85,21 +88,27 @@ void * Kmem_alloc(unsigned int size)
 				i->next=t;
 				i->size=size;
 				i->status=STAT_BUSY;
-				return (void *)t->base;
+				unlock_irq_restore(flags);
+				return (void *)i->base;
 			}
 			else if(i->size==size)/*change its status*/
 			{
 				i->status=STAT_BUSY;
+				unlock_irq_restore(flags);
 				return (void *)i->base;
 			}
 		}
 	}
+	unlock_irq_restore(flags);
 	return NULL;
 }
 
 void Kmem_free(void * base)
 {
 	struct hole * i,*pre,*t;
+	unsigned int flags;
+	
+	lock_irq_save(flags);
 	for(i=h_head,pre=i;i!=NULL;i=i->next)
 	{
 		if(((u32_t)i->base==(u32_t)base)&&(i->status==STAT_BUSY))/*confirm the hole is used*/
@@ -128,6 +137,7 @@ void Kmem_free(void * base)
 		}
 		pre=i;
 	}
+	unlock_irq_restore(flags);
 }
 /*show mem */
 void mem_show()
@@ -135,7 +145,7 @@ void mem_show()
 	struct hole *t;
 	for(t=h_head;t!=NULL;t=t->next)
 	{
-		printf("0x%x-0x%x:[%d] size:%d\n",t->base,t->base+t->size-1,t->status,t->size);
+		printk("0x%x-0x%x:[%d] size:0x%x\n",t->base,t->base+t->size-1,t->status,t->size);
 	}
 }
 /*memory unit check,write and read*/
@@ -247,5 +257,7 @@ void __init mem_init()
 	h_head->status=STAT_FREE;
 	
 	kmem_base=(char *)Kmem_alloc(PAGE_SIZE*NR_PAGES);
+	if(!kmem_base)
+			panic("cannot alloc for kernel");
 	kmem_page_init();
 }

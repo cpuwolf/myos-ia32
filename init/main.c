@@ -22,8 +22,8 @@
 		
 void __init start_kernel(void)
 {
-		mem_init();/*check extended memory size,the conventional memory is 1mb*/
 		scr_init();/* srceen const init*/
+		mem_init();/*check extended memory size,the conventional memory is 1mb*/
 		intr_init();/* i8259 interrupt init*/
 		printk("KITOS 1.0 Written By Wei Shuai\n");
 		intel_init();/* check cpu*/

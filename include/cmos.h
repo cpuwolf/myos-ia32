@@ -16,13 +16,13 @@
 
 
 #define CMOS_READ(addr) ({ \
-out_byte(0x70,addr|0x80); \
-in_byte(0x71); \
+outb(0x70,addr|0x80); \
+inb(0x71); \
 })
 
 #define CMOS_WRITE(val, addr) ({ \
-out_byte(0x70,addr|0x80); \
-out_byte(val,0x71); \
+outb(0x70,addr|0x80); \
+outb(val,0x71); \
 })
 
 

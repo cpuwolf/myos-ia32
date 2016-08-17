@@ -35,7 +35,7 @@
 
 #define SYS_VECTOR 	0x3C
 
-#define NR_TASK 	3
+#define NR_TASK 	10
 #define GDT_SIZE 	(FIRST_LDT_INDEX+NR_TASK)
 #define IDT_SIZE 	70
 

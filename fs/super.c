@@ -26,7 +26,7 @@ static void get_super(unsigned char * buf,struct super_block * bd)
 	bytspersec=*(unsigned short *)bs->sector_size;
 	if(bytspersec!=512)
 	{
-		printk("Error Sector size\n");
+		panic("Error Sector size\n");
 		return;
 	}
 	t_fatsz16=bs->fatsz16;
@@ -84,6 +84,8 @@ void mount_fs(struct ide_drive * dev)
 	struct super_block * sp=&super_block;
 	sp->base=dev->table[0].first_log;
 	bp=get_block(sp->base,512);
+	if(!bp)
+			panic("canot read block");
 	get_super(bp->data,sp);
 	rip=get_inode();
 	sp->rootdir=rip;

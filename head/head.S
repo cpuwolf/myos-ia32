@@ -4,7 +4,7 @@
 */
 #include <const.h>
 
-
+.code32
 .globl start32
 .text
 start32:
@@ -13,7 +13,7 @@ start32:
 	movl	%eax,%ds
 	movl	%eax,%es
 	movl	%eax,%ss
-	movl	$0x09A000,%esp		/* init   segment reg 	*/
+	movl	$0x9A000,%esp		/* init   segment reg 	*/
 
 /*init bss memory zero*/
 	cld	
@@ -26,6 +26,7 @@ start32:
 	
 	/* setup gdt,idt,tss*/
 	call	prot_init
+
 		
 	ljmp	$CS_SELECTOR,$pro
 pro:	movl	$DS_SELECTOR,%eax	/* reload all the segment registers*/

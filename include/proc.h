@@ -43,9 +43,9 @@ struct stackframe
 /* process memory map*/
 struct memmap
 {
-	u32_t 	mem_vir;
-	u32_t	mem_phys;
-	u32_t	mem_size;
+	u32_t 	vir;
+	u32_t	phys;
+	u32_t	size;
 };
 
 #define	T	0
@@ -66,19 +66,25 @@ struct proc
 	u16_t ldt_selector;
 	struct segdesc ldt[3];
 	struct thread thread;
-	int p_pid;			/* process id*/
+	int pid;			/* process id*/
 	int status;
 	long counter;
-	struct memmap p_map[3];	/* message map*/
+	int flags;
+	struct memmap map[3];	/* message map*/
 	struct file_struct files;/*file struct map*/
 	struct fs_struct fs;/*file system info*/
 	struct proc * next;	
 };
+
+/* flags in struct proc */
+#define	P_IN_USE	001	
 
 struct pcb
 {
 	unsigned char kernel_stack[KERNEL_THREAD_SIZE];
 };
 
+/*get struct stackframe * from struct proc * */
+#define GET_PROC_KSTACK(p) (struct stackframe *)((u32_t)(p)+KERNEL_THREAD_SIZE)-1
 
 #endif

@@ -24,7 +24,7 @@
 
 
 
-#define memcpy(f,t,n) rep_movsb((f),(t),(n))
+#define memcpy(f,t,n) rep_movsb(((void *)f),((void *)t),(n))
 #define memset(s,c,num) rep_stosb((c),(s),(num))
 
 /*bytes copy*/
@@ -54,26 +54,26 @@ extern inline void rep_stosb(int value,void * dest,int numwords)
 
 
 
-extern inline unsigned char in_byte (unsigned short port)
+extern inline unsigned char inb (unsigned short port)
 {
   register unsigned char data;
   __asm__ __volatile__ ("inb %w1,%b0":"=a" (data):"d" (port));
   return data;
 }
 
-extern inline unsigned char imm_in_byte (unsigned short port)
+extern inline unsigned char imm_inb (unsigned short port)
 {
   register unsigned char data;
   __asm__ __volatile__ ("inb %w1,%b0":"=a" (data):"ir" (port));
   return data;
 }
 
-extern inline void out_byte (unsigned short port,unsigned char value)
+extern inline void outb(unsigned short port,unsigned char value)
 {
   __asm__ __volatile__ ("outb %1,%w0"::"d" (port),"a"(value));
 }
 
-extern inline void imm_out_byte (unsigned short port,unsigned char value)
+extern inline void imm_outb(unsigned short port,unsigned char value)
 {
   __asm__ __volatile__ ("outb %1,%w0"::"ir" (port),"a"(value));
 }

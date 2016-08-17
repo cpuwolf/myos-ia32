@@ -63,26 +63,25 @@ void alloc_segments(struct proc * p)
 {
 	struct stackframe * p_reg;
 	p_reg=((struct stackframe *)((u32_t)p+KERNEL_THREAD_SIZE))-1;
-	init_codeseg(&p->ldt[CS_LDT_INDEX],(unsigned)p->p_map[T].mem_phys,(unsigned)p->p_map[T].mem_size,USER_PRIV);
-	init_dataseg(&p->ldt[DS_LDT_INDEX],(unsigned)p->p_map[D].mem_phys,(unsigned)p->p_map[D].mem_size,USER_PRIV);
-	init_dataseg(&p->ldt[SS_LDT_INDEX],(unsigned)p->p_map[S].mem_phys,(unsigned)p->p_map[S].mem_size,USER_PRIV);
+	init_codeseg(&p->ldt[CS_LDT_INDEX],(unsigned)p->map[T].phys,(unsigned)p->map[T].size,USER_PRIV);
+	init_dataseg(&p->ldt[DS_LDT_INDEX],(unsigned)p->map[D].phys,(unsigned)(p->map[S].vir+p->map[S].size),USER_PRIV);
 	p_reg->cs=seg_selector(CS_LDT_INDEX,1,USER_PRIV);
 	p_reg->ds=seg_selector(DS_LDT_INDEX,1,USER_PRIV);
 	p_reg->es=seg_selector(DS_LDT_INDEX,1,USER_PRIV);
 	p_reg->fs=seg_selector(DS_LDT_INDEX,1,USER_PRIV);
 	p_reg->gs=seg_selector(DS_LDT_INDEX,1,USER_PRIV);
-	p_reg->ss=seg_selector(SS_LDT_INDEX,1,USER_PRIV);
+	p_reg->ss=seg_selector(DS_LDT_INDEX,1,USER_PRIV);
 }
 /*build ldt from process*/
-inline void set_ldt_desc(struct segdesc * segdp,unsigned base,unsigned size,int pri)
+inline void set_ldt_desc(struct segdesc * segdp,unsigned base)
 {
-	init_dataseg(segdp,base,size,pri);
+	init_dataseg(segdp,base,(unsigned)(sizeof(struct segdesc)*3),KERNEL_PRIV);
 	segdp->access=(PRESENT|LDT_TYPE);
 }
 /*build tss*/
-inline void set_tss_desc(struct segdesc * segdp,unsigned base,unsigned size,int pri)
+inline void set_tss_desc(struct segdesc * segdp,unsigned base)
 {
-	init_dataseg(segdp,base,size,pri);
+	init_dataseg(segdp,base,sizeof(tss),KERNEL_PRIV);
 	segdp->access=(PRESENT|(KERNEL_PRIV<<5)|TSS_TYPE);
 }
 
@@ -114,6 +113,13 @@ static void __init trap_init()
 	set_trap_gate((u32_t)segment_not_present,11);
 	set_trap_gate((u32_t)stack_exception,12);
 	set_trap_gate((u32_t)general_protection,13);
+	set_trap_gate((u32_t)page_fault,14);
+	set_trap_gate((u32_t)reserve,15);
+	set_trap_gate((u32_t)x87_fpu,16);
+	set_trap_gate((u32_t)align_check,17);
+	set_trap_gate((u32_t)machine_check,18);
+	set_trap_gate((u32_t)simd,19);
+			
 	/* system call */
 	set_sys_gate((u32_t)system_call,SYS_VECTOR);
 	/* interrupt gate*/
@@ -157,11 +163,11 @@ void __init prot_init(void)
 	for(t=0,ldt_index=FIRST_LDT_INDEX;t<NR_TASK;t++,ldt_index++)
 	{
 		rp=(struct proc *)&proc_table[t];
-		set_ldt_desc(&gdt[ldt_index],(unsigned)rp->ldt,(unsigned)(sizeof(struct segdesc)*3),KERNEL_PRIV);
+		set_ldt_desc(&gdt[ldt_index],(unsigned)rp->ldt);
 		rp->ldt_selector=seg_selector(ldt_index,0,KERNEL_PRIV);	
 	}
 	/*create a tss descriptor in GDT*/
-	set_tss_desc(&gdt[TSS_INDEX],(unsigned)&tss,sizeof(tss),KERNEL_PRIV);
+	set_tss_desc(&gdt[TSS_INDEX],(unsigned)&tss);
 	tss.iobase=sizeof(tss);
 	tss.ss0=DS_SELECTOR;
 	trap_init();

@@ -3,13 +3,15 @@
 * 	wei shuai	2003/4
 */
 
+#include <config.h>
 
 
-#define SETUPSEG	0x1000			
-#define BOOTSEG		0x07C0		
-#define	INITSEG		0x9000 		
-#define	SETUPSECTS	17		
-#define	msglen		21					
+BOOTSEG=0x07C0		
+INITSEG=DEF_INITSEG		
+SETUPSEG=DEF_SETUPSEG
+SYSSEG=DEF_SYSSEG
+
+#define	SETUPSECTS	1		
 
 .globl _start
 .code16
@@ -43,108 +45,90 @@ go:	movw	$0xA000, %sp		/*setup real-mode stack*/
 	xorw	%dx,%dx
 	xorw	%bx,%bx
 	int	$0x10
+
 /*print 'The system is loading'*/
 	lea	msg,%bp
-	movw	$msglen,%cx
+	movw	$21,%cx
 	movw	$0x0007,%bx
 	movw	$0x1301,%ax
 	int	$0x10
 	
 /*get floppy parameters(max sectors)*/
-	xorb	%dl,%dl
-	xorw	%ax,%ax
-	int 	$0x13		/*reset fd*/
-	
-	movb	$0x08,%ah
+	xorw	%dx,%dx
+	movw	$0x0201,%ax
+	movw	$0x0012,%cx		#try sector 18
+	movw	$0x200+SETUPSECTS*200,%bx
+	int 	$0x13
+	jnc		got_sectors
+
+	movb	$0x0f,%cl		#try sector	15
+	movw	$0x0201,%ax
 	int	$0x13
-	xorb	%ch,%ch
+	jnc		got_sectors
+got_sectors:
 	movw	%cx,msectors	
 	
-/*now ! we read the floppy 0head,0track,2sect*/
-
-read_it:	
-	xorw	%ax,%ax
-	xorb	%dl,%dl
-	int 	$0x13
-	
+/*now ! we load setup(0head,0track,2sect) */	
 	movw	$SETUPSEG,%ax
 	movw	%ax,%es
-	movb	$0x02,%ah
-	movb	$SETUPSECTS,%al
-	movw	$0x0002,%cx
-	movw	$0x0,%dx
-	movw	$0x0,%bx
-	int	$0x13
+	xorw    %bx,%bx
+	movw	$SETUPSECTS,nsectors
+	movw	$0,head
+	movw	$0,track
+	movw	$2,sector
+	call	read_nsectors
 
-	jc	read_it 	#load failed!
-	
-read2:	
-	movw	%ax,%cx
-	shlw	$9,%cx
-	addw	%cx,%bx
-	movb	$0x1,%dh
-	movb	$0x02,%ah
-	movb	msectors,%al
-	movw	$0x0001,%cx
-	int	$0x13
+/*now! we load system(just follow the setup)*/
+	movw    $SYSSEG,%ax
+    movw    %ax,%es
+    xorw    %bx,%bx
+	movw    $50,nsectors
+    movw    $0,head
+    movw    $0,track
+    movw    $(SETUPSECTS+2),sector
+    call    read_nsectors
 
-	jnc	read2ok
-	
-	xorw	%ax,%ax
-	xorb	%dl,%dl
-	int 	$0x13
-	jmp	read2
-read2ok: 
+	call	kill_motor
 
+/*After loaded setup&system ,we jump to the setup*/
 
-/*get extended memory size int kb use e801*/
-	movw	$0x0900,%ax
-	movw	%ax,%gs
-	movw	$0xe801, %ax
-	int	$0x15
-	jc	mem_skip
-
-	andl	$0xffff, %edx			
-	shll	$6, %edx			
-	movl	%edx, %gs:(0x0)			
-	andl	$0xffff, %ecx			
- 	addl	%ecx, %gs:(0x0)
- 	jmp 	mem_ok
-mem_skip:
- 	movl	$0, %gs:(0x0)	
-mem_ok:
-/*enable A20*/
-	cli
-	call 	empty_8042
-	movb	$0xd1,%al
-	outb	%al,$0x64
-	call	empty_8042
-	movb    $0xdf,%al
-    	outb    %al,$0x60
-	call    empty_8042
-	sti
-
-
-/*we prepare switch to protected mode	*/
-	cli
-	movw    %cs,%ax
-    	movw    %ax,%ds
-	lidt 	idt_table	
-	lgdt	gdt_table
-
-/*convert to protected mode */
-	movl	$1,%eax
-	movl	%eax,%cr0	
-	jmp	flush
-flush:
-	jmpl	$0x08,$0x10000    		/*code prefix is 0x66*/
+	ljmp	$SETUPSEG,$0
 	
 track:		.word 	0
 head:		.word 	0
 sector:		.word	0	
+nsectors:   .word   0   /*number of sectors to read*/
 msectors:	.word 	0	/*max sectors of the floppy device*/
 	
-/*read_track:			#entry(%al is number of sectors)
+read_nsectors:#(read (track,head,sector) nsectors to es:bx)
+rep_read:
+	call	read_sector
+	addw	$512,%bx
+	decw	nsectors
+
+	cmpw    $0,nsectors
+    jle	read_done
+
+	incw	sector
+
+	movw    sector,%ax
+    cmpw    msectors,%ax
+	jle	next_read			#have not read a track	
+
+	movw    $1,sector			#reset sector=1
+	movw	$1,%ax				#have read a track
+	sub		head,%ax
+	jne	ok4_read				#head have not been Max
+	incw	track				#head have been Max			
+ok4_read:					
+	movw	%ax,head
+next_read:						#have not read a track
+	jmp	rep_read
+
+read_done:	
+	ret
+
+read_sector:#(read (track,head,sector) to es:bx)
 	pushw	%ax
 	pushw	%bx	
 	movw 	$0x0e2e,%ax
@@ -160,44 +144,33 @@ msectors:	.word 	0	/*max sectors of the floppy device*/
 	movb	%dl,%dh		#head
 	xorb	%dl,%dl		#device 0
 	movb	$0x02,%ah
+	movb	$0x01,%al   #read one sector
 	int 	$0x13
 	
-	jnc	track_read_ok
+	jnc	sector_read_ok
 	
 	xorb	%dl,%dl
 	xorw	%ax,%ax
 	int 	$0x13		#reset fd
-	jmp	read_track
-track_read_ok:	
+	pushw   %ax
+    pushw   %bx
+    movw    $0x0e2a,%ax
+    movw    $0x0007,%bx
+    int $0x10           #print '*'   0x2a='*'
+    popw    %bx
+    popw    %ax
+	jmp	read_sector
+sector_read_ok:	
 	ret
-*/
-empty_8042:
-			inb 	$0x64,%al
-			test	$2,%al
-			jnz 	empty_8042	
-			ret
-			
-msg:		.ascii	"The system is loading"
 
-t_gdt:
-	.word	0,0,0,0			# blank
+kill_motor:
+	movw	$0x3f2,%dx
+	xorb	%al,%al
+	outb	%al,%dx
+	ret
 
-	.word	0xFFFF			# 4Gb - (0x100000*0x1000 = 4Gb)
-	.word	0			# base address = 0
-	.word	0x9A00			# code read/exec
-	.word	0x00CF			# granularity = 4096, 386
-					#  (+5th nibble of limit)
-
-	.word	0xFFFF			# 4Gb - (0x100000*0x1000 = 4Gb)
-	.word	0			# base address = 0
-	.word	0x9200			# data read/write
-	.word	0x00CF
-
-idt_table:      .word   0
-        		.word   0,0
-
-gdt_table:      .word   4*8-1
-                .word   t_gdt,0x9	
+msg:	.ascii	"The system is loading"
+		.byte	0x0d,0x0a
 
 .org 510
 	.word 	0xAA55

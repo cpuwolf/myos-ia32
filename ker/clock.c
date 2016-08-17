@@ -18,15 +18,15 @@ static struct cmos_time clocktime;
 /*hardware beep()*/
 void beep()
 {
-	out_byte(0x61,(in_byte(0x61)|3));
-	out_byte(TIMER_MODE,0xB6);/*counter2,lsb,msb,mode3,binary*/
-	out_byte(TIMER2,(unsigned char)BEEP_FREQ);
-	out_byte(TIMER2,(BEEP_FREQ>>8));
+	outb(0x61,(inb(0x61)|3));
+	outb(TIMER_MODE,0xB6);/*counter2,lsb,msb,mode3,binary*/
+	outb(TIMER2,(unsigned char)BEEP_FREQ);
+	outb(TIMER2,(BEEP_FREQ>>8));
 }
 /*hardware unbeep()*/
 void unbeep()
 {
-	out_byte(0x61,in_byte(0x61)|~3);
+	outb(0x61,inb(0x61)|~3);
 }
 
 int __ISR clock_handler(int irq)
@@ -58,9 +58,9 @@ static inline void get_cmos_time()
 }
 void __init clock_init()
 {
-	out_byte(TIMER_MODE,SQUARE_WAVE);
-	out_byte(TIMER0,(unsigned char)TIMER_COUNT);
-	out_byte(TIMER0,TIMER_COUNT>>8);
+	outb(TIMER_MODE,SQUARE_WAVE);
+	outb(TIMER0,(unsigned char)TIMER_COUNT);
+	outb(TIMER0,TIMER_COUNT>>8);
 	clocktick=0;
 	/*read CMOS time*/
 	get_cmos_time();

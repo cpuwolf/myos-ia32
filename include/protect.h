@@ -85,7 +85,6 @@ struct tss_s
 /*used by userprocess*/
 #define CS_LDT_INDEX 	0
 #define DS_LDT_INDEX 	1
-#define SS_LDT_INDEX 	2
 
 
 #define seg_selector(index,TI,RPL) ((index<<3)|(TI<<2)|RPL)

@@ -11,7 +11,7 @@
 #include <type.h>
 #include <proc.h>
 #include <wait.h>
-
+#include <stdarg.h>
 #include <hd.h>
 #include <partition.h>
 #include <buf.h>
@@ -26,9 +26,13 @@ void mem_init();
 void prot_init();
 void intr_init();/* i8259 init function*/
 void proc_init();
+
 /* kernel console output function*/
 void scr_init();
 void printk(const char *,...);
+
+/*vsprintf.c*/
+void vsprintf(char *,const char *,va_list);
 
 /*system.c*/
 void in_words(unsigned short port,void * dest,unsigned bcount);
@@ -48,6 +52,16 @@ void general_protection();
 void stack_exception();
 void inval_tss();
 void segment_not_present();	
+void page_fault();
+void reserve();
+void x87_fpu();
+void align_check();
+void machine_check();
+void simd();
+			
+/*protect.c*/
+void alloc_segments(struct proc *);
+
 
 /*irq.c*/
 /* i8259 hardware control function*/
@@ -76,6 +90,7 @@ extern void ret_with_schedule();
 extern void system_call();/* system call*/
 
 /*proc.c*/
+extern struct proc * get_free_proc_struct();
 extern void bill_process_time();
 extern void RoundRobin();
 extern void proc_ready(struct proc * rp);
@@ -98,6 +113,7 @@ extern void * kmalloc(unsigned int);
 extern void kfree(void *);
 
 /*hd.c*/
+extern int bread(void *buf,int size,int block);
 extern int ide_read(void *buf,int size,int block);
 
 /*partition.c*/
@@ -124,6 +140,17 @@ extern void put_block(struct buf * );
 struct file * get_filp();
 void put_filp(struct file *);
 void filp_init();
+
+/*panic.c*/
+extern void panic(const char *);
+
+/*exit.c*/
+extern int do_exit(int);
+extern int sys_exit(int);
+
+/* fork.c */
+extern int sys_fork();
+
 #endif
 
 

@@ -11,3 +11,6 @@ extern int kbread();
 extern void printf(const char * fmt, ...);
 extern int fread(void*,int,int,int);
 extern int feof(int);
+extern void _exit(int);
+extern int fork();
+extern void memory();

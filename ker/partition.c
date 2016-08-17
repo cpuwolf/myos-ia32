@@ -13,7 +13,7 @@
 static int get_part_table(struct partition_entry * table)
 {
 	unsigned char boot[512];
-	ide_read(boot,512,0);
+	bread(boot,512,0);
 	if((boot[510]!=0x55)||(boot[511]!=0xaa))
 		return 0;
 	rep_movsb((char *)(boot+0x1be),table,sizeof(struct partition_entry)*4);

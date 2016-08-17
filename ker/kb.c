@@ -37,9 +37,9 @@ static int kbd_wait_for_input(void)
         n = TIMEOUT_CONST;
         do 
         {
-                status = in_byte(KBD_STATUS_REG);
+                status = inb(KBD_STATUS_REG);
                 if (!(status & KBD_OBF))continue;
-		data = in_byte(KBD_DATA_REG);
+		data = inb(KBD_DATA_REG);
                 if (status & (KBD_GTO | KBD_PERR))continue;
 		return (data & 0xff);
         } while (--n);
@@ -51,23 +51,23 @@ static void kbd_write(int address, int data)
 	int status;
 	do 
 	{
-		status = in_byte(KBD_STATUS_REG);  
+		status = inb(KBD_STATUS_REG);  
 	} while (status & KBD_IBF);
-	out_byte( address,data);
+	outb( address,data);
 }
 
 static void kb_wait()
 {
 		int i;
 		for(i=0;i<TIMEOUT_CONST;i++)
-				if((in_byte(KBD_STATUS_REG)&KBD_IBF)==0)
+				if((inb(KBD_STATUS_REG)&KBD_IBF)==0)
 						break;
 }
 
 static void send_cmd(unsigned char c)
 {
 		kb_wait();
-		out_byte(KBD_CNTL_REG,c);
+		outb(KBD_CNTL_REG,c);
 }
 
 static void status_process(unsigned char code)
@@ -104,12 +104,12 @@ int __ISR kbd_int(int irq)
 		unsigned char status;
 		register struct kb_buf_t *kb;
 		send_cmd(KBD_CNTL_DISABLE);
-		status=in_byte(KBD_STATUS_REG);
+		status=inb(KBD_STATUS_REG);
 		do
 		{
-			code=in_byte(KBD_DATA_REG);
+			code=inb(KBD_DATA_REG);
 			/*printk("kb:0x%x",code);*/
-			status=in_byte(KBD_STATUS_REG);
+			status=inb(KBD_STATUS_REG);
 		}while(status & KBD_OBF);
 		kb=&kb_line;
 		if(code&0x80)

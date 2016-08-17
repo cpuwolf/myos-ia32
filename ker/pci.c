@@ -41,7 +41,7 @@ DECLARE_SLOT_FUNC(pcidev,struct pci_dev,free);
 static void pci_in_byte(struct pci_dev * dev,int regaddr,u8_t * value)
 {
 	out_dword(0xCF8,(0x80000000|(dev->bus<<16)|(dev->device<<11)|(dev->func<<8)|regaddr));
-	*value=in_byte(0xCFC+(regaddr&3));
+	*value=inb(0xCFC+(regaddr&3));
 }
 
 static void pci_in_word(struct pci_dev * dev,int regaddr,u16_t * value)
@@ -58,7 +58,7 @@ static void pci_in_dword(struct pci_dev * dev,int regaddr,u32_t * value)
 /*static void pci_out_byte(struct pci_dev * dev,int regaddr,u8_t value)
 {
 	out_dword(0xCF8,(0x80000000|(dev->bus<<16)|(dev->device<<11)|(dev->func<<8)|regaddr));
-	out_byte(0xCFC+(regaddr&3),value);
+	outb(0xCFC+(regaddr&3),value);
 }
 
 static void pci_out_word(struct pci_dev * dev,int regaddr,u16_t value)

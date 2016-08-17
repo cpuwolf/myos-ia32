@@ -53,7 +53,7 @@ static int req_count;
 
 inline static int getstate(struct ide_drive *dev,unsigned char mask,unsigned char value)
 {
-	return ((in_byte(dev->base+REG_STATUS)&(mask))==(value));
+	return ((inb(dev->base+REG_STATUS)&(mask))==(value));
 }
 
 int __ISR hd_handlerp(int irq)
@@ -65,14 +65,14 @@ int __ISR hd_handlerp(int irq)
 	int retries=1000;
 	do
 	{
-		state=in_byte(dev->base+REG_STATUS);
+		state=inb(dev->base+REG_STATUS);
 		/*printk("hd return status value:0x%x\n",state);*/
 		if(state&STATUS_BUSY)
 			continue;
 		if(state&STATUS_DTRQ)
 			goto ok_read;
 	}while(--retries>0);
-	printk("hd error code:0x%x\n",in_byte(dev->base+REG_ERROR));
+	printk("hd error code:0x%x\n",inb(dev->base+REG_ERROR));
 	return 1;
 ok_read:
 	if(rq->type==READ)
@@ -102,35 +102,35 @@ static int command(struct ide_drive * wn,struct command * cmd)
 		printk("controller not ready!\n");
 		return 0;
 	}
-	out_byte(wn->base+REG_CONTROL,wn->ctl);
-	out_byte(wn->base+REG_LDH,0xa0|(cmd->device<<4)|cmd->head);/* select a device */
-	out_byte(wn->base+REG_COUNT,cmd->count);
-	out_byte(wn->base+REG_SECTOR,cmd->sector);
-	out_byte(wn->base+REG_CYL_LOW,cmd->cylinder);
-	out_byte(wn->base+REG_CYL_HIGH,cmd->cylinder>>8);
-	out_byte(wn->base+REG_COMMAND,cmd->command);
+	outb(wn->base+REG_CONTROL,wn->ctl);
+	outb(wn->base+REG_LDH,0xa0|(cmd->device<<4)|cmd->head);/* select a device */
+	outb(wn->base+REG_COUNT,cmd->count);
+	outb(wn->base+REG_SECTOR,cmd->sector);
+	outb(wn->base+REG_CYL_LOW,cmd->cylinder);
+	outb(wn->base+REG_CYL_HIGH,cmd->cylinder>>8);
+	outb(wn->base+REG_COMMAND,cmd->command);
 	return 1;
 }
 static void do_readwrite(struct ide_drive * wn,struct request * rq)
 {
 	while(!getstate(wn,STATUS_BUSY|STATUS_READY|STATUS_ERR,STATUS_READY))printk("controller not ready!\n");
 	/*printk("DUMP:disk:%d b:%d n:%d buf:%d\n",wn->mainid,rq->block,rq->count,(u32_t)rq->buf);*/
-	out_byte(wn->base+REG_CONTROL,wn->ctl);
+	outb(wn->base+REG_CONTROL,wn->ctl);
 	
-	out_byte(wn->base+REG_COUNT,rq->count);
+	outb(wn->base+REG_COUNT,rq->count);
 
 	/*LBA*/
-	out_byte(wn->base+REG_SECTOR,(rq->block)&0xff);
-	out_byte(wn->base+REG_CYL_LOW,(rq->block>>8)&0xff);
-	out_byte(wn->base+REG_CYL_HIGH,(rq->block>>16)&0xff);
-	out_byte(wn->base+REG_LDH,0xa0|(wn->lba<<6)|(wn->mainid<<4)|((rq->block>>24)&0xf));
+	outb(wn->base+REG_SECTOR,(rq->block)&0xff);
+	outb(wn->base+REG_CYL_LOW,(rq->block>>8)&0xff);
+	outb(wn->base+REG_CYL_HIGH,(rq->block>>16)&0xff);
+	outb(wn->base+REG_LDH,0xa0|(wn->lba<<6)|(wn->mainid<<4)|((rq->block>>24)&0xf));
 
 	/*count*/
 	
 	if(rq->type==READ)
-		out_byte(wn->base+REG_COMMAND,CMD_MULTREAD);
+		outb(wn->base+REG_COMMAND,CMD_MULTREAD);
 	else if(rq->type==WRITE)
-		out_byte(wn->base+REG_COMMAND,CMD_WRITE);
+		outb(wn->base+REG_COMMAND,CMD_WRITE);
 	
 }
 
@@ -172,11 +172,11 @@ static int hd_specify(struct ide_drive * wn)
 	unsigned char id_string[40];
 	struct command cmd;
 	struct deviceid * devidp;
-	r=in_byte(wn->base+REG_CYL_LOW);
-	out_byte(wn->base+REG_CYL_LOW,~r);
-	if(in_byte(wn->base+REG_CYL_LOW)==r)
+	r=inb(wn->base+REG_CYL_LOW);
+	outb(wn->base+REG_CYL_LOW,~r);
+	if(inb(wn->base+REG_CYL_LOW)==r)
 	{
-		printk("port check error!\n");
+		panic("port check error!\n");
 		return 0;
 	}
 	
@@ -280,7 +280,15 @@ static int do_read(unsigned id,unsigned char * buf,int size,int block)
 	unlock_irq_restore(flags);
 	return 1;
 }
-/*interface function*/
+/*kernel read*/
+int bread(void *buf,int size,int block)
+{
+	if(buf==NULL)return 0;
+    do_read(0,buf,size,block);
+    return 0;	
+}
+
+/*user interface function*/
 int ide_read(void *buf,int size,int block)
 {
 	if(buf==NULL)return 0;

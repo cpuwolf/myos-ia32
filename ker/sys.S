@@ -145,24 +145,55 @@ ENTRY(stack_exception)
 ENTRY(general_protection)
 	pushl	$13
 	jmp	errexception
+ENTRY(page_fault)
+	pushl	$14
+	jmp errexception
+ENTRY(reserve)
+	pushl	$15
+	jmp exception
+ENTRY(x87_fpu)
+	pushl	$16
+	jmp exception
+ENTRY(align_check)
+	pushl	$17
+	jmp errexception
+ENTRY(machine_check)
+	pushl	$18
+	jmp exception
+ENTRY(simd)
+	pushl	$19
+	jmp exception
 
-
-errexception:				/*	push a error code*/
-	popl	(ex_number)			/*	ex_number*/
-	popl	(error_code)
+errexception:				/*	have a error code*/
+	xchgl	%eax,4(%esp)			/*	ex_number*/
+	xchgl	%ebx,(%esp)		/* error code */
 	jmp	1f
 exception:
-	movl	$0,(error_code)
-	popl	(ex_number)
+	xchgl	%eax,(%esp)		/*get ex_number*/
+	pushl	%eax
 1:
-	pushl	(error_code)		/*return address*/
-	SAVE_ALL
+	pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
+    pushl   %esi
+    pushl   %edi
+    pushl   %ebp
+    pushl   %ds
+    pushl   %es
+    pushl   %fs
+    pushl   %gs
+
 	/*GET_CURRENT(%ebx)*/
 	movl	%esp,%esi		/*%esi->struct stackframe pointer*/
 	
 	pushl	%esi			/*push struct stackframe pointer*/
-	pushl	(error_code)		/*push error code*/
-	pushl	(ex_number)		/*push exception number*/
+	pushl	%ebx		/*push error code*/
+	pushl	%eax		/*push exception number*/
+
+	movl	$DS_SELECTOR,%edx
+	movw	%dx,%ds
+	movw	%dx,%es
+	movw	%dx,%fs
 	call	c_exception
 	addl	$3*4,%esp
 	
@@ -179,8 +210,6 @@ sys_call_table:
 	.long	sys_open	/*3*/
 	.long 	sys_read	/*4*/
 	.long	sys_feof	/*5*/
-.bss
-ex_number:
-	.word 0,0
-error_code:
-	.word 0,0
+	.long	sys_exit	/*6*/
+	.long	sys_fork	/*7*/
+	.long	mem_show	/*8*/

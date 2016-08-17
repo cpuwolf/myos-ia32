@@ -52,6 +52,7 @@ void schedule()
 	switch(curr->status)
 	{ 
 		case TASK_INTERRUPT:
+		case TASK_STOPED:
 			proc_block(curr);
 		default:
 		case TASK_RUNNING:

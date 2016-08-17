@@ -7,8 +7,6 @@
 #include <const.h>
 #include <stdarg.h>
 
-extern void vsprintf(char * buf,const char * fmt, va_list args);
-
 void fs_check()
 {
 	register int i;
@@ -52,3 +50,23 @@ int feof(int fp)
 	__asm__ __volatile__("int %1":"=a"(i):"ir"(SYS_VECTOR),"0"(5),"b"(fp));
 	return i;
 }
+
+void _exit(int exit_code)
+{
+	int i;
+    __asm__ __volatile__("int %1":"=a"(i):"ir"(SYS_VECTOR),"0"(6),"b"(exit_code));
+}
+
+int fork()
+{
+	int i;
+	__asm__ __volatile__("int %1":"=a"(i):"ir"(SYS_VECTOR),"0"(7));
+	return i;
+}
+
+void memory()
+{
+	int i;
+	__asm__ __volatile__("int %1":"=a"(i):"ir"(SYS_VECTOR),"0"(8));
+}
+

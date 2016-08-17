@@ -6,8 +6,8 @@
 %.o: %.c 
 	$(CC) $(CFLAGS) -nostdinc -fno-builtin-function -c $< -o $@
 
-%.s: %.S 
+.S.s: 
 	$(CPP)  -D__ASSEMBLY__ $(AFLAGS) -traditional $< -o $@
 
-%.o: %.s 
+.s.o:  
 	$(AS) $(AFLAGS) -o $@ $<
