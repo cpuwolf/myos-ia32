@@ -1,0 +1,6 @@
+#! /bin/sh
+
+
+cp -r /root/os/ /mnt/DOS_hda5/os/
+
+

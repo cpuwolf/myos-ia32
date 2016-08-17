@@ -1,0 +1,8 @@
+#! /bin/sh
+
+
+cp /mnt/DOS_hda5/head.S   /root/os/
+cp /mnt/DOS_hda5/bootsect.S   /root/os/
+cp /mnt/DOS_hda5/main.c   /root/os/ker
+
+

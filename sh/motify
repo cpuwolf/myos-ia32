@@ -1,0 +1,6 @@
+#! /bin/sh
+
+
+cp -rf /mnt/DOS_hda5/os/os /root/tmp
+
+
