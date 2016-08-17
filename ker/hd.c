@@ -32,26 +32,8 @@ struct command
 };
 
 
-static struct ide_drive
-{
-	unsigned mainid;
-	unsigned base;
-	unsigned irq;
-	unsigned state;
-	unsigned pcylinders;
-	unsigned pheads;
-	unsigned psectors;
-	unsigned lcylinders;
-	unsigned lheads;
-	unsigned lsectors;
-	unsigned precomp;
-	unsigned ctl;
-	unsigned char max_multsect;
-	unsigned buf_size;
-	unsigned dword_io;
-	unsigned lba;
-	
-}wini[2],*current_dev;
+struct ide_drive wini[2];
+static struct ide_drive *current_dev;
 
 #define	READ 	2
 #define WRITE 	3
@@ -200,9 +182,8 @@ static int hd_specify(struct ide_drive * wn)
 }
 void __init hd_init()
 {
-	register struct ide_drive * wn;
+	struct ide_drive * wn;
 	char numberdevice=0;
-	/*u16_t vector[2];*/
 	u8_t BIOS[16];
 	current_dev=&wini[0];
 	req_head=req_tail=req_buf;
@@ -222,12 +203,12 @@ void __init hd_init()
 	wn->lsectors=*(BIOS+14);
 	wn->ctl=0x08;
 	wn->mainid=0;
-
 	put_irq_handler(wini[0].irq,hd_handlerp);
 	put_irq_handler(wini[1].irq,hd_handlers);
 	enable_irq(wini[0].irq);
 	/*enable_irq(wini[1].irq);	*/
 	hd_specify(&wini[0]);
+	wn->part_ops=partition_check;
 }
 static void do_request(void)
 {

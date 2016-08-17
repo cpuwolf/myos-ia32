@@ -172,7 +172,7 @@ exception:
 
 .data	
 sys_call_table:
-	.long	0	/*0*/
+	.long	fs_init	/*0*/
 	.long	kb_read		/*1*/
 	.long	tty_write	/*2*/
 	.long	sys_open	/*3*/

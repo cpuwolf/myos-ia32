@@ -2,6 +2,7 @@
 #define _OS_HD_H
 
 #include <type.h>
+#include <partition.h>
 
 #define REG_BASE0	0X1F0
 #define REG_BASE1	0X170
@@ -93,6 +94,28 @@ struct deviceid
 	u32_t lcapacity;
 	u16_t multisect;
 	u32_t lba_capacity;
+};
+
+struct ide_drive
+{
+	unsigned mainid;
+	unsigned base;
+	unsigned irq;
+	unsigned state;
+	unsigned pcylinders;
+	unsigned pheads;
+	unsigned psectors;
+	unsigned lcylinders;
+	unsigned lheads;
+	unsigned lsectors;
+	unsigned precomp;
+	unsigned ctl;
+	unsigned char max_multsect;
+	unsigned buf_size;
+	unsigned dword_io;
+	unsigned lba;
+	struct partition_entry table[4];
+	void (*part_ops)();
 };
 
 #endif

@@ -9,6 +9,11 @@
 
 extern void vsprintf(char * buf,const char * fmt, va_list args);
 
+void fs_check()
+{
+	register int i;
+	__asm__ __volatile__("int %2":"=a"(i):"0"(0),"ir"(SYS_VECTOR));
+}
 int kbread()
 {
 	register int i;

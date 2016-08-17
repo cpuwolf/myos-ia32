@@ -15,7 +15,7 @@
 #define	NR_HOLE		30
 
 #define	PAGE_SIZE	1024
-#define	NR_PAGE		30
+#define	NR_PAGES		30
 
 #define	PAGE_S_CONT	(~0)
 #define	PAGE_S_FREE	0
@@ -30,7 +30,7 @@ static struct hole
 
 typedef unsigned int kpage_t;
 
-static kpage_t kmem_page[NR_PAGE];/*used by Kmalloc()*/
+static kpage_t kmem_page[NR_PAGES];/*used by Kmalloc()*/
 static char * kmem_base;
 
 
@@ -149,51 +149,83 @@ void mem_show()
 	return i;
 }*/
 
-static inline void __init kmem_page_init(char * kbase)
+/*we prepare kernel memory space for drivers and kernel itself*/
+static inline void __init kmem_page_init()
 {
 	int i;
-	for(i=0;i<NR_PAGE;i++)
+	for(i=0;i<NR_PAGES;i++)
 		kmem_page[i]=PAGE_S_CONT;
 	kmem_page[0]=PAGE_S_FREE;
 }
 
-void * kmalloc(unsigned int size)
+inline static unsigned int calc_count(unsigned int size)
 {
-	int count,tmp_c;
-	kpage_t * pptr=kmem_page,*tmp_p;
+	int count;
 	count=size/PAGE_SIZE;
 	if((size%PAGE_SIZE)>0)count++;
+	return count;
+}
+void * kmalloc(unsigned int size)
+{
+	int count,tmp_c=0,a_flag=0;
+	kpage_t * pptr=kmem_page,*free_h=kmem_page;
+	count=calc_count(size);
 	
-	for(; pptr<=(kmem_page+NR_PAGE) ;pptr++);
+	for(; pptr<=(kmem_page+NR_PAGES) ;pptr++)
+	{
 		if(*pptr==PAGE_S_FREE)
 		{
 			tmp_c=1;
-			tmp_p=pptr;
-			if(*pptr==PAGE_S_CONT)
-				tmp_c++;
-			if(tmp_c==count)
-				return kmem_base+((tmp_p-kmem_page)/sizeof(kpage_t))*PAGE_SIZE;
+			free_h=pptr;
+			a_flag=1;
 		}
+		else if(*pptr==PAGE_S_CONT)
+		{
+			if(a_flag)
+			{
+				tmp_c++;	
+			}
+		}
+		if(tmp_c==count)
+		{
+			*free_h=size;
+			if(*(pptr+1)==PAGE_S_CONT)
+				*(pptr+1)=PAGE_S_FREE;
+			return (void *)((unsigned)kmem_base+(free_h-kmem_page)*PAGE_SIZE);
+		}
+	}
+		
 	return NULL;
 }
 
 void kfree(void * base)
 {
-	int index,count,i;
-	unsigned int flags;
-	kpage_t * pptr=kmem_page;
+	int index;
+	kpage_t *start=kmem_page,*end=kmem_page,*tmp;
 	
 	index=((unsigned int)base-(unsigned int)kmem_base)/PAGE_SIZE;
+	start=kmem_page+index;
+	end=start+calc_count(*start);
+	end--;
 	
-	lock_irq_save(flags);
-	count=*(pptr+index)/PAGE_SIZE;
-	if((*(pptr+index)%PAGE_SIZE)>0)count++;
-	
-	for(i=index;i<=count;i++)
-		*(pptr+i)=PAGE_S_CONT;
-	*pptr=PAGE_S_FREE;	
-	unlock_irq_restore(flags);
+	if(start!=kmem_page)
+	{
+		tmp=start-1;
+		while(*tmp==PAGE_S_CONT)tmp--;
+		if(*tmp==PAGE_S_FREE)
+			*start=PAGE_S_CONT;
+		else
+			*start=PAGE_S_FREE;	
+	}else *start=PAGE_S_FREE;
+
+
+	if(end!=(kmem_page+NR_PAGES))
+	{
+		if(*(end+1)==PAGE_S_FREE)
+			*(end+1)=PAGE_S_CONT;
+	}	
 }
+
 
 void __init mem_init()
 {
@@ -211,6 +243,6 @@ void __init mem_init()
 	h_head->next=NULL;
 	h_head->status=STAT_FREE;
 	
-	kmem_base=(char *)Kmem_alloc(PAGE_SIZE*NR_PAGE);
-	kmem_page_init(kmem_base);
+	kmem_base=(char *)Kmem_alloc(PAGE_SIZE*NR_PAGES);
+	kmem_page_init();
 }

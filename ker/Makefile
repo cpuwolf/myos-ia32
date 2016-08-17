@@ -3,7 +3,7 @@
 
 all: system
  
-OBJPRO=head.o main.o cpu.o console.o sys.o protect.o irq.o kb.o clock.o hd.o system.o proc.o pci.o lib.o fs.o mem.o schedule.o
+OBJPRO=head.o main.o cpu.o console.o sys.o protect.o irq.o kb.o clock.o hd.o system.o proc.o pci.o lib.o fs.o mem.o schedule.o super.o partition.o
 
 system: $(OBJPRO) k.ld
 	rm -f $@

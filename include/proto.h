@@ -12,6 +12,9 @@
 #include <proc.h>
 #include <wait.h>
 
+#include <hd.h>
+#include <partition.h>
+
 /* init hardware function*/
 void intel_init();
 void kb_init();
@@ -95,6 +98,15 @@ extern void kfree(void *);
 
 /*hd.c*/
 extern int ide_read(void *buf,int size,int block);
+
+/*partition.c*/
+extern void partition_check(struct partition_entry *);
+
+/*super.c*/
+void mount_fs(struct ide_drive *);
+
+/*fs.c*/
+extern void fs_init();
 #endif
 
 

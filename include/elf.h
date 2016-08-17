@@ -3,6 +3,10 @@
  *	2004/5/22
  *
  * */
+#ifndef _OS_ELF_H
+#define _OS_ELF_H
+
+
 #define EI_NIDENT 16
 
 typedef struct{
@@ -138,3 +142,6 @@ unsigned long p_align;
 #define PT_PHDR 6
 #define PT_LOPROC 0x70000000
 #define PT_HIPROC 0x7fffffff
+
+
+#endif

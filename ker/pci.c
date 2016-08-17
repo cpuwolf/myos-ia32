@@ -8,6 +8,7 @@
 #include <const.h>
 #include <system.h>
 #include <section.h>
+#include <slot.h>
 #include <pci.h>
 
 struct interval
@@ -17,6 +18,7 @@ struct interval
 	u8_t type;
 };
 
+#define SLOT_SIZE 18
 static struct pci_dev
 {
 	unsigned char bus;
@@ -28,9 +30,12 @@ static struct pci_dev
 	u8_t header_type;
 	u8_t irq;
 	struct interval interval[6];
-}pcidev[8];
+	struct free_list free;
+}pcidev[SLOT_SIZE];
 
-static struct pci_dev * devptr=pcidev;
+FREE_SLOT_HEAD(f_pcidev_h);
+DECLARE_SLOT_FUNC(pcidev,struct pci_dev,free);
+
 
 /* PCI main bridge io operation */
 static void pci_in_byte(struct pci_dev * dev,int regaddr,u8_t * value)
@@ -70,7 +75,7 @@ static void pci_out_dword(struct pci_dev * dev,int regaddr,u32_t value)
 /* the operations are hardware depends*/
 
 /*check bus 0 scanning for a bridge */
-static int pci_check_main()
+static int __init pci_check_main()
 {
 	struct pci_dev dev;
 	u16_t x,c;
@@ -99,29 +104,30 @@ static void pci_dev_setup_irq(struct pci_dev * dev)
 	pci_in_byte(dev,PCI_INT_PIN,&irq);
 	if(irq)pci_in_byte(dev,PCI_INT_LINE,&irq);
 		dev->irq=irq;
+	if(irq)printk("PCI:IRQ%d\n",dev->irq);
 }
 
 inline static u32_t pci_intervalsize(u32_t sz,u32_t mask)
 {
 	u32_t size=sz&mask;
-	size=size&~(size-1);
+	size=size&~(size-1);/*get lowest 1*/
 	return size;
 }
 
-static void pci_dev_setup_interval(struct pci_dev * dev)
+static void __init pci_dev_setup_interval(struct pci_dev * dev,int count)
 {
 	int i;
 	u32_t base,size,reg;
-	for(i=0;i<6;i++)
+	for(i=0;i<count;i++)
 	{
 		reg=PCI_BASE0+i*4;
 		pci_in_dword(dev,reg,&base);
 		pci_out_dword(dev,reg,0xffffffff);
 		pci_in_dword(dev,reg,&size);
 		pci_out_dword(dev,reg,base);
-		/*if(size==0x0 || size==0xffffffff) invalid interval
-			continue;*/
-		if((base&0x01)==0)/* memory interval*/
+		if(size==0x0 || size==0xffffffff) /*invalid interval*/
+			continue;
+		if(!(base&0x01))/* memory interval*/
 		{
 			dev->interval[i].base=(base&(~0xf));
 			dev->interval[i].size=pci_intervalsize(size,(~0xf));
@@ -131,62 +137,91 @@ static void pci_dev_setup_interval(struct pci_dev * dev)
 			dev->interval[i].base=(base&(~0x3));
 			dev->interval[i].size=pci_intervalsize(size,0xfffc);
 		}
+		printk("PCI:[%x-%x]\n",dev->interval[i].base,dev->interval[i].base+dev->interval[i].size-1);
 		dev->interval[i].type=base&0x01;
 	}
 }
 
 
 /* enum device on a bus */
-static void pci_device_enum(struct pci_dev * tmpdev)
+static void __init pci_scan_device(struct pci_dev * temp)
 {
 	u32_t id;
 	u32_t class;
 	u8_t type;
+	struct pci_dev * dev;
 	/*
 	check the tmp device by checking the vendorid
 	*/
-	pci_in_dword(tmpdev,PCI_VENDOR_ID,&id);
-	if(id==0x00000000||id==0xffffffff)
+	pci_in_dword(temp,PCI_VENDOR_ID,&id);
+	if(id==0x00000000||id==0xFFFFFFFF||id==0x0000FFFF||id==0xFFFF0000)
 		return ;
+	dev=alloc_slot_pcidev(&f_pcidev_h);
+	if(!dev)
+	{
+		printk("PCI:no spaces\n");
+		return;
+	}
 	/* else setup a pci device */
-	devptr->bus=tmpdev->bus;
-	devptr->device=tmpdev->device;
-	devptr->func=tmpdev->func;
-	devptr->vendor=id & 0xffff;
-	devptr->deviceid=(id >> 16) & 0xffff;
-	pci_in_dword(tmpdev,PCI_CLASS,&class);
-	pci_in_byte(tmpdev,PCI_HEADER,&type);
-	devptr->class=(class>>=8);
-	devptr->header_type=type & 0x7f;
-	printk("PCI device 0x%x:0x%x [b%d d%d f%d]%d\n",devptr->vendor,devptr->deviceid,devptr->bus,devptr->device,devptr->func,devptr->header_type);
-	switch(devptr->header_type)
+	/*rep_movsb(temp,dev,sizeof(struct pci_dev));*/
+	dev->bus=temp->bus;
+	dev->device=temp->device;
+	dev->func=temp->func;
+	dev->vendor=id & 0xFFFF;
+	dev->deviceid=(id >> 16) & 0xFFFF;
+	pci_in_dword(temp,PCI_CLASS,&class);
+	pci_in_byte(temp,PCI_HEADER,&type);
+	dev->class=(class>>=8);
+	class>>=8;
+	dev->header_type=(type & 0x7F);
+	printk("PCI:found [0x%x/0x%x] b%d d%d f%d %x %x\n",\
+	dev->vendor,dev->deviceid,dev->bus,dev->device,dev->func,class,dev->header_type);
+	switch(dev->header_type)
 	{
 		case PCI_DEVICE_NORMAL:
-			pci_dev_setup_irq(devptr);
-			pci_dev_setup_interval(devptr);
+			if(class==PCI_CLASS_BRIDGE_PCI)
+				goto bad;
+			pci_dev_setup_irq(dev);
+			pci_dev_setup_interval(dev,6);
 			break;
 		case PCI_DEVICE_BRIDGE:
+			if(class!=PCI_CLASS_BRIDGE_PCI)
+				goto bad;
+			pci_dev_setup_interval(dev,2);
+			printk("PCI:pci-pci bridge\n");
 			break;
+		default:
+			printk("PCI:unknown header type 0x%x\n",dev->header_type);
+			return;
+		bad:
+			printk("PCI:class %x dose not match header type %x\n",class,dev->header_type);
 	}
-	/*devptr++;*/
 }
 
-
-static void pci_scan_bus()
+static void __init pci_scan_slot(struct pci_dev * temp)
+{
+	int i;
+	for(i=0;i<8;i++)
+	{
+		temp->func=i;
+		pci_scan_device(temp);
+	}
+	
+}
+static void __init pci_scan_bus()
 {
 	struct pci_dev tmp;
-	unsigned i,j;
+	unsigned i;
 	tmp.bus=0;
 	for(i=0;i<32;i++)
-		for(j=0;j<8;j++)
-		{
-			tmp.device=i;
-			tmp.func=j;
-			pci_device_enum(&tmp);
-		}
+	{
+		tmp.device=i;
+		pci_scan_slot(&tmp);
+	}
 }
 void __init pci_init()
 {
+	init_slot_pcidev(&f_pcidev_h,SLOT_SIZE);
 	if(pci_check_main())
 	{
 		pci_scan_bus();

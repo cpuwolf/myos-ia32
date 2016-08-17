@@ -7,7 +7,8 @@ OUTPUT_ARCH(i386)
 ENTRY(start32)
 SECTIONS
 {
-  	.text 0x10000: {
+	. = 0x10000;
+  	.text : {
 	*(.text)
 	}
 	/*int service routing*/

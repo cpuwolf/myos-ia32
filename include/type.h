@@ -8,6 +8,8 @@ typedef unsigned int u32_t;
 typedef int (* irq_handler)(int);
 typedef void (* task_ptr)(void);
 
+typedef unsigned int fd_set;
+
 #define NULL (void *)0
 
 #endif

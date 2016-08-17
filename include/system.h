@@ -100,5 +100,25 @@ extern inline void out_dword (unsigned short port,unsigned value)
   __asm__ __volatile__ ("outl %1,%w0"::"d" (port),"a"(value));
 }
 
+extern inline int find_zero_bit(unsigned int * p)
+{
+	register unsigned int index=0;
+	__asm__ __volatile__(\
+		"bsfl %1,%0\n\t"\
+		"jne 1f\n\t"\
+		"movl $32,%0\n\t"\
+		"1:\n\t"\
+		:"=r"(index)\
+		:"r"(~(*p)));
+	return index;
+}
 
+extern inline void set_bit(unsigned int * p,int nr)
+{
+	__asm__ __volatile__(\
+	"btsl %1,%0"\
+	:"=m"(*p)\
+	:"Ir"(nr)\
+	);
+}
 #endif

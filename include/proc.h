@@ -10,6 +10,7 @@ written by weishuai
 #include <type.h>
 #include <protect.h>
 #include <const.h>
+#include <fs.h>
 
 #define	TASK_RUNNING 	1
 #define	TASK_STOPED	2
@@ -38,7 +39,6 @@ struct stackframe
 	u32_t	esp;		/* +60 */
 	u32_t	ss;		/* +64 */
 };
-
 
 /* process memory map*/
 struct memmap
@@ -70,6 +70,8 @@ struct proc
 	int status;
 	long counter;
 	struct memmap p_map[3];	/* message map*/
+	struct file_struct files;/*file struct map*/
+	struct fs_struct fs;/*file system info*/
 	struct proc * next;	
 };
 

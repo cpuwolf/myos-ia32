@@ -95,9 +95,9 @@ static char * int_to_str(char * s,unsigned int d)
 	}
 }
 
-static char * int_to_hexstr(char * s,int d)
+static char * int_to_hexstr(char * s,unsigned int d)
 {
-	int y,i=0,j;
+	unsigned int y,i=0,j;
 	char tmp;
 	if(d==0)
 	{

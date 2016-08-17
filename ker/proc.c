@@ -39,7 +39,8 @@ idle1:
 static void try_task()
 {
 	/*unsigned char buf[512];*/
-	fopen("COMMAND.COM");
+	fs_check();
+	fopen("ZT.COM");
 	mem_show();
 idle2:
 	/*fread(buf,512,36);*/
@@ -161,6 +162,11 @@ void proc_thread_init(struct proc * p)
 	p->thread.esp=(u32_t)p_regs;
 	p->thread.eip=(u32_t)ret_with_schedule;
 }
+void proc_fd_init(struct proc * p)
+{
+	p->files.openfd=0;
+	p->files.maxopen=5;
+}
 void __init proc_init()
 {
 		struct proc * rp;
@@ -175,6 +181,7 @@ void __init proc_init()
 		{
 			rp=(struct proc *)&proc_table[t];
 			proc_thread_init(rp);
+			proc_fd_init(rp);
 			p_reg=((struct stackframe *)((u32_t)rp+KERNEL_THREAD_SIZE))-1;		
 			p_reg->eip=(u32_t)tasktab[t].init_eip;
 			rp->p_map[T].mem_phys=0;
