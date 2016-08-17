@@ -118,49 +118,6 @@ static void put_name(char * name)
 	kfree(name);
 }
 
-inline static unsigned int FstSecofDataClu(struct super_block * bd,unsigned int n)
-{
-	return ((n-2)*bd->cluster_size)+bd->data_first_sec;
-}
-/*translate file logic sector to physics sector*/
-inline static unsigned int LSecToPSec(struct inode * ino,unsigned int n,unsigned clucnt)
-{	
-	return FstSecofDataClu(ino->i_sb,ino->block[n/clucnt])+n%clucnt;
-}
-int sys_read(void *buf,int size,int count,int fp)
-{
-	char * kbuf;
-	struct buf * bf;
-	int LSec,secsz,SecCnt,LoadCnt,offset,copy,left;
-	struct file * f;
-	kbuf=umap(current,buf);
-	if(kbuf==NULL)
-		return 0;
-	left=size*count;
-	f=current->files.fd_array[fp];
-	if(f==NULL)
-		return 0;
-	secsz=f->f_ino->i_sb->sector_size;
-	/*normal=512*/
-	LSec=f->f_pos/secsz;/*get first logic sector*/
-	SecCnt=do_cdiv(left,secsz);/*how many sectors user want to read*/
-	LoadCnt=do_cdiv(SecCnt,(BLOCK_SIZE/secsz));/*actural read times*/
-	while(LoadCnt>0)
-	{
-		bf=get_block(LSecToPSec(f->f_ino,LSec,f->f_ino->i_sb->cluster_size));
-		if(bf==NULL)
-			return 0;
-		offset=f->f_pos%secsz;
-		copy=BLOCK_SIZE-offset;
-		if(left-copy<0)
-			copy=left;/*adjust*/
-		(f->f_pos)+=copy;
-		LSec-=BLOCK_SIZE/secsz;/*how many sectors have been read?*/
-		LoadCnt--;
-		memcpy(bf->data+offset,kbuf,copy);
-		put_block(bf);
-	}
-}
 
 int sys_open(char * name)
 {
@@ -171,12 +128,12 @@ int sys_open(char * name)
 	struct file * f;
 	rip=current->fs.root;
 	tmp=get_name(name);
-	bp=get_block(rip->block[0]);
-	dip=scan_dentry_buf(bp->data,BLOCK_SIZE,tmp);
+	bp=get_block(rip->block[0],1024);
+	dip=scan_dentry_buf(bp->data,1024,tmp);
 	if(dip==NULL)
 		return -1;
 	dip->i_sb=rip->i_sb;
-	/*printk("\nfound %s--%dBytes\n",dip->name,dip->size);*/
+	/*printk("\nfound %s--%dBytes--cluster:%d\n",dip->name,dip->size,dip->i_sb->cluster_size);*/
 	put_name(tmp);
 	put_block(bp);
 	read_map(dip);

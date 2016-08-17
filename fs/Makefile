@@ -3,7 +3,7 @@
 
 all: fs.o
  
-OBJPRO=super.o open.o inode.o block.o filedes.o
+OBJPRO=super.o open.o read.o inode.o block.o filedes.o
 
 fs.o: $(OBJPRO) 
 	@rm -f $@

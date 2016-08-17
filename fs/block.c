@@ -8,17 +8,20 @@
 #include <buf.h>
 #include <proto.h>
 
-struct buf * get_block(int block)
+
+struct buf * get_block(int block,int size)
 {
 	struct buf * bp;
 	bp=(struct buf *)kmalloc(sizeof(struct buf));
+	bp->data=(char *)kmalloc(size);
 	if(bp==NULL)return NULL;
-	ide_read(bp->data,BLOCK_SIZE,block);
+	ide_read(bp->data,size,block);
 	return bp;
 }
 
 
 void put_block(struct buf * bp)
 {
+	kfree(bp->data);
 	kfree(bp);
 }

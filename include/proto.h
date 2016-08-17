@@ -117,7 +117,7 @@ extern void put_inode(struct inode *);
 extern void read_map(struct inode * i);
 
 /*block.c*/
-extern struct buf * get_block(int);
+extern struct buf * get_block(int,int);
 extern void put_block(struct buf * );
 
 /*filedes.c*/

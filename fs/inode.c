@@ -73,7 +73,7 @@ static unsigned int FATEntryVal(struct super_block * bd,int cluster)
 	offset=FAToffset(bd,cluster);
 	/*if we know cluster number N,where is the first sector*/
 	sector=bd->resvdseccnt+(offset/bd->sector_size)+bd->base;
-	secbuf=get_block(sector);
+	secbuf=get_block(sector,1024);
 	if(secbuf==NULL)
 	{
 		printk("no kernel space\n");
@@ -107,12 +107,13 @@ void read_map(struct inode * ip)
 	
 	blk_size=(ip->i_sb->cluster_size)*(ip->i_sb->sector_size);
 	count=do_cdiv(ip->size,blk_size);
-	/*if((ip->size%blk_size)>0)count++;*/
+	printk("file count:%d\n",count);
 	index=ip->block[0];
 	do
 	{
 		ip->block[i++]=index;
 		index=FATEntryVal(ip->i_sb,index);
+		printk("file index:%d\n",index);
 	}while((!eeof(ip->i_sb,index))&&(count-->0));
 	
 }

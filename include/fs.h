@@ -130,7 +130,7 @@ struct inode
 	struct super_block * i_sb;
 	unsigned int size;			/*file size*/
 	unsigned char name[255];
-	unsigned int block[6];
+	unsigned int block[10];
 	struct inode_operations * i_op;
 	struct free_list free;
 };

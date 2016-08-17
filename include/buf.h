@@ -6,11 +6,11 @@
 #ifndef _OS_BUF_H
 #define _OS_BUF_H
 
-#define BLOCK_SIZE 1024
+/*#define BLOCK_SIZE 1024*/
 
 struct buf
 {
-	unsigned char data[BLOCK_SIZE];
+	char * data;
 };
 
 #endif

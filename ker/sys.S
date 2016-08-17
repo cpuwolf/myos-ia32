@@ -178,6 +178,7 @@ sys_call_table:
 	.long	tty_write	/*2*/
 	.long	sys_open	/*3*/
 	.long 	sys_read	/*4*/
+	.long	sys_feof	/*5*/
 .bss
 ex_number:
 	.word 0,0

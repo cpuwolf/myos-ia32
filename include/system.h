@@ -138,10 +138,10 @@ extern inline unsigned int do_cdiv(unsigned int s,unsigned int d)
 {
 	unsigned int q,r;
 	__asm__ __volatile__(\
-	"div %2\n\t"\
-	"testl %%edx,%%edx\n\t"\
+	"div %3\n\t"\
+	"testl %1,%1\n\t"\
 	"je 1f\n\t"\
-	"incl %%eax\n\t"\
+	"incl %0\n\t"\
 	"1:\n\t"
 	:"=a"(q),"=d"(r)\
 	:"0"(s),"r"(d),"1"(0)\

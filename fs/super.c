@@ -24,6 +24,11 @@ static void get_super(unsigned char * buf,struct super_block * bd)
 	/*determin it is fat 12 or 16 or 32*/
 	rootentcnt=*(unsigned short *)bs->dir_number;
 	bytspersec=*(unsigned short *)bs->sector_size;
+	if(bytspersec!=512)
+	{
+		printk("Error Sector size\n");
+		return;
+	}
 	t_fatsz16=bs->fatsz16;
 	t_fatsz32=bs->u.fat32.fatsz32;
 	t_totsec16=*(unsigned short *)bs->totsec16;
@@ -78,7 +83,7 @@ void mount_fs(struct ide_drive * dev)
 	struct inode * rip;
 	struct super_block * sp=&super_block;
 	sp->base=dev->table[0].first_log;
-	bp=get_block(sp->base);
+	bp=get_block(sp->base,512);
 	get_super(bp->data,sp);
 	rip=get_inode();
 	sp->rootdir=rip;

@@ -36,22 +36,23 @@ idle1:
 	goto idle1;
 }
 
+#define BUF_SIZE 100
 static void init_task()
 {
-	unsigned char buf[50];
+	unsigned char buf[BUF_SIZE];
 	int file,size,i,j;
 	fs_check();
 	file=fopen("HD.C");
 	if(file==-1)goto idle2;
-	/*for(j=0;j<=10;j++)
+	while(!feof(file))
 	{
-		size=fread(buf,50,1,file);
-		for(i=0;i<50;i++)
+		size=fread(buf,1,BUF_SIZE,file);
+		for(i=0;i<BUF_SIZE;i++)
 		{
 			if(*(buf+i)!=0x0D)
 				printf("%c",*(buf+i));
 		}
-	}*/
+	}
 	mem_show();
 idle2:
 	/*fread(buf,512,36);*/
