@@ -7,6 +7,8 @@ it was designed to run on my PentiumII PC when I was in college 2003~2005
 * single core OS
 * IA32 protected mode
 * user application on ring 3
+  * init
+  * idle
 * kernel and driver on ring 0
 * IA32 segment management
 * memory management
