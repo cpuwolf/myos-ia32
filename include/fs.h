@@ -8,6 +8,7 @@
 #define _OS_FS_H
 
 #include <type.h>
+#include <slot.h>
 
 /*hardware dependent struct*/
 struct boot_sector
@@ -121,6 +122,7 @@ struct super_block
 		unsigned  dir_first_sec;
 		unsigned  dir_number;	
 		unsigned  data_first_sec;
+		struct inode * rootdir;
 };
 
 struct inode
@@ -130,6 +132,7 @@ struct inode
 	unsigned char name[255];
 	unsigned int block[6];
 	struct inode_operations * i_op;
+	struct free_list free;
 };
 struct inode_operations
 {
@@ -147,9 +150,10 @@ struct dentry_operations
 struct file
 {
 	struct file_operations * f_op;
-	struct dentry * f_dentry;
+	struct inode * f_ino;
 	unsigned int f_pos;
 	int count;	
+	struct free_list free;
 };
 
 struct file_operations
@@ -169,6 +173,6 @@ struct file_struct
 /*file system information*/
 struct fs_struct
 {
-	struct dentry * root;
+	struct inode * root;
 };
 #endif

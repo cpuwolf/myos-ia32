@@ -33,13 +33,12 @@ static type * alloc_slot_##ptr(struct free_list ** head)\
 		*head=ret->next;\
 	}else return NULL;\
 	return ((type *)((char *)(ret)-(unsigned long)(&((type *)0)->member)));\
-}
-
-
-static void free_slot(struct free_list ** head,struct free_list * h)
-{
-	h->next=*head;
-	*head=h;
+}\
+\
+static void free_slot(struct free_list ** head,struct free_list * h)\
+{\
+	h->next=*head;\
+	*head=h;\
 }
 
 

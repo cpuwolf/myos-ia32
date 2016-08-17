@@ -1,15 +1,16 @@
 # WRITTEN BY CPUWOLF 2003
 
 
-all: system
+all: kernel.o
  
-OBJPRO=head.o main.o cpu.o console.o sys.o protect.o irq.o kb.o clock.o hd.o system.o proc.o pci.o lib.o fs.o mem.o schedule.o super.o partition.o
+OBJPRO=cpu.o console.o sys.o protect.o \
+irq.o kb.o clock.o hd.o system.o proc.o pci.o lib.o mem.o \
+schedule.o  partition.o 
 
-system: $(OBJPRO) k.ld
+kernel.o: $(OBJPRO) 
 	rm -f $@
-	$(LD) $(LDFLAGS) -T ./k.ld -o $@ $(OBJPRO)
+	$(LD) $(LDFLAGS) -r $(OBJPRO) -o $@
 	
-head.s: head.S
 
 sys.s: sys.S
 

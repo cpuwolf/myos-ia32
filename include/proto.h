@@ -14,6 +14,7 @@
 
 #include <hd.h>
 #include <partition.h>
+#include <buf.h>
 
 /* init hardware function*/
 void intel_init();
@@ -80,7 +81,7 @@ extern void RoundRobin();
 extern void proc_ready(struct proc * rp);
 extern void proc_block(struct proc * bp);
 extern struct proc * pick_proc();
-extern void * user_to_phys(struct proc * p,void * offset);
+extern void * umap(struct proc * p,void * offset);
 
 /*schedule.c*/
 extern void schedule();
@@ -103,10 +104,26 @@ extern int ide_read(void *buf,int size,int block);
 extern void partition_check(struct partition_entry *);
 
 /*super.c*/
-void mount_fs(struct ide_drive *);
+extern void mount_fs(struct ide_drive *);
 
-/*fs.c*/
+/*open.c*/
 extern void fs_init();
+extern void proc_fd_init(struct proc *);
+
+/*inode.c*/
+extern void inode_init();
+extern struct inode * get_inode();
+extern void put_inode(struct inode *);
+extern void read_map(struct inode * i);
+
+/*block.c*/
+extern struct buf * get_block(int);
+extern void put_block(struct buf * );
+
+/*filedes.c*/
+struct file * get_filp();
+void put_filp(struct file *);
+void filp_init();
 #endif
 
 

@@ -169,7 +169,7 @@ void cons_echo(char * s)
 
 void tty_write(char * s)
 {
-	cons_echo(user_to_phys(current,s));
+	cons_echo(umap(current,s));
 }
 
 /*used by user process and kernel */

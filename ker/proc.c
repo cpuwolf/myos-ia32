@@ -38,9 +38,14 @@ idle1:
 
 static void try_task()
 {
-	/*unsigned char buf[512];*/
+	unsigned char buf[12];
+	int file,size,i;
 	fs_check();
-	fopen("ZT.COM");
+	file=fopen("MAIN.S");
+	if(file==-1)goto idle2;
+	size=fread(buf,12,1,file);
+	/*for(i=0;i<12;i++)
+		printk("%c",*(buf+i));*/
 	mem_show();
 idle2:
 	/*fread(buf,512,36);*/
@@ -162,11 +167,7 @@ void proc_thread_init(struct proc * p)
 	p->thread.esp=(u32_t)p_regs;
 	p->thread.eip=(u32_t)ret_with_schedule;
 }
-void proc_fd_init(struct proc * p)
-{
-	p->files.openfd=0;
-	p->files.maxopen=5;
-}
+
 void __init proc_init()
 {
 		struct proc * rp;
@@ -208,7 +209,7 @@ void __init proc_init()
 		current->need_resched=1;
 }
 
-void * user_to_phys(struct proc * p,void * offset)
+void * umap(struct proc * p,void * offset)
 {
 	/*check the offset to determine whether offset is in the segment*/
 	if((u32_t)offset >= p->p_map[D].mem_vir+p->p_map[D].mem_size)

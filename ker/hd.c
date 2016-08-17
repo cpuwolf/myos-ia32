@@ -114,7 +114,7 @@ static int command(struct ide_drive * wn,struct command * cmd)
 static void do_readwrite(struct ide_drive * wn,struct request * rq)
 {
 	while(!getstate(wn,STATUS_BUSY|STATUS_READY|STATUS_ERR,STATUS_READY))printk("controller not ready!\n");
-	/*printk("DUMP:disk:%d b:%d n:%d buf:%d\n",wn->mainid,rq->block,rq->count,(u32_t)rq->buf);*/
+	printk("DUMP:disk:%d b:%d n:%d buf:%d\n",wn->mainid,rq->block,rq->count,(u32_t)rq->buf);
 	out_byte(wn->base+REG_CONTROL,wn->ctl);
 	
 	out_byte(wn->base+REG_COUNT,rq->count);
@@ -241,6 +241,6 @@ static int do_read(unsigned id,unsigned char * buf,int size,int block)
 int ide_read(void *buf,int size,int block)
 {
 	if(buf==NULL)return 0;
-	do_read(0,buf,size,block);
+	do_read(0,umap(current,buf),size,block);
 	return 0;
 }

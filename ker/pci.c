@@ -104,7 +104,7 @@ static void pci_dev_setup_irq(struct pci_dev * dev)
 	pci_in_byte(dev,PCI_INT_PIN,&irq);
 	if(irq)pci_in_byte(dev,PCI_INT_LINE,&irq);
 		dev->irq=irq;
-	if(irq)printk("PCI:IRQ%d\n",dev->irq);
+	/*if(irq)printk("PCI:IRQ%d\n",dev->irq);*/
 }
 
 inline static u32_t pci_intervalsize(u32_t sz,u32_t mask)
@@ -137,7 +137,7 @@ static void __init pci_dev_setup_interval(struct pci_dev * dev,int count)
 			dev->interval[i].base=(base&(~0x3));
 			dev->interval[i].size=pci_intervalsize(size,0xfffc);
 		}
-		printk("PCI:[%x-%x]\n",dev->interval[i].base,dev->interval[i].base+dev->interval[i].size-1);
+		/*printk("PCI:[%x-%x]\n",dev->interval[i].base,dev->interval[i].base+dev->interval[i].size-1);*/
 		dev->interval[i].type=base&0x01;
 	}
 }
@@ -174,8 +174,8 @@ static void __init pci_scan_device(struct pci_dev * temp)
 	dev->class=(class>>=8);
 	class>>=8;
 	dev->header_type=(type & 0x7F);
-	printk("PCI:found [0x%x/0x%x] b%d d%d f%d %x %x\n",\
-	dev->vendor,dev->deviceid,dev->bus,dev->device,dev->func,class,dev->header_type);
+	/*printk("PCI:found [0x%x/0x%x] b%d d%d f%d %x %x\n",\
+	dev->vendor,dev->deviceid,dev->bus,dev->device,dev->func,class,dev->header_type);*/
 	switch(dev->header_type)
 	{
 		case PCI_DEVICE_NORMAL:

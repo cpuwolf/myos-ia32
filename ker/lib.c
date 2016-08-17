@@ -38,3 +38,10 @@ int fopen(char * name)
 	__asm__ __volatile__("int %3":"=a"(i):"0"(3),"b"(name),"ir"(SYS_VECTOR));
 	return i;
 }
+
+int fread(void *buf,int size,int count,int fp)
+{
+	register int i;
+	__asm__ __volatile__("int %6":"=a"(i):"0"(4),"b"(buf),"c"(size),"d"(count),"S"(fp),"ir"(SYS_VECTOR));
+	return i;
+}

@@ -30,7 +30,7 @@ void __init partition_check(struct partition_entry * tab)
 	printk("Partition:\n");
 	for(i=0;i<4;i++)
 	{
-		tap=&tab[i];
+		tap=tab+i;
 		if(tap->sysind!=NO_PART)
 			printk("<hda%d%c[%d-%d]>\n",i,((tap->bootind==0x80)?'*':' '),tap->first_log,tap->first_log+tap->size-1);
 	}
