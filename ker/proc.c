@@ -205,7 +205,7 @@ struct tasktab
 void proc_thread_init(struct proc * p)
 {
 	struct stackframe * p_regs;
-	p_regs=(struct stackframe *)((u32_t)p+KERNEL_THREAD_SIZE)-1;
+	p_regs=GET_PROC_KSTACK(p);
 	p->thread.esp0=(u32_t)(p_regs+1);
 	p->thread.esp=(u32_t)p_regs;
 	p->thread.eip=(u32_t)ret_with_schedule;
@@ -232,7 +232,7 @@ void __init proc_init()
 			rp=(struct proc *)&proc_table[t];
 			proc_thread_init(rp);
 			proc_fd_init(rp);
-			p_reg=((struct stackframe *)((u32_t)rp+KERNEL_THREAD_SIZE))-1;		
+			p_reg=GET_PROC_KSTACK(rp);		
 			p_reg->eip=(u32_t)tasktab[t].init_eip;
 			rp->map[T].phys=0;
 			rp->map[T].vir=0;

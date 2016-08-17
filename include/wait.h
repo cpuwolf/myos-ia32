@@ -29,6 +29,10 @@ typedef struct wait_queue_head
 #define DECLARE_WAIT_QUEUE_HEAD(name) \
 	wait_queue_head_t name={{&(name).queue_list,&(name).queue_list}}
 
+#define INIT_WAIT_QUEUE_HEAD(name) \
+	(name).queue_list.prev=&((name).queue_list);\
+	(name).queue_list.next=&((name).queue_list);
+	
 static inline void add_wait_queue(wait_queue_head_t * head,wait_queue_t * new)
 {
 	list_add(&head->queue_list,&new->queue_list);

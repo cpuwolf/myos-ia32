@@ -3,10 +3,10 @@
 *	2004/9/26
 */
 #include <type.h>
-#include <fs.h>
 #include <hd.h>
 #include <proto.h>
 #include <slot.h>
+#include <fs.h>
 
 #define FILP_NR 8
 

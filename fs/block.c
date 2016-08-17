@@ -15,7 +15,8 @@ struct buf * get_block(int block,int size)
 	bp=(struct buf *)kmalloc(sizeof(struct buf));
 	bp->data=(char *)kmalloc(size);
 	if(bp==NULL)return NULL;
-	bread(bp->data,size,block);
+	if(bread(bp->data,size,block)==-1)
+			panic("bread Error");
 	return bp;
 }
 

@@ -35,14 +35,8 @@ LIB_FILES=lib/lib.a
 all: fdImage
 
 
-clean:
+clean: cleansubdirs
 	@rm -f fdImage vmsys system.map vmkernel
-	@make -C tools clean
-	@make -C ker clean
-	@make -C boot clean
-	@make -C init clean
-	@make -C head clean
-	@make -C fs clean
 
 fdImage: ossubdirs boot/bootsect boot/setup tools/build 
 	$(LD) $(LDFLAGS) -T ./k.ld head/head.o init/main.o\
@@ -54,6 +48,11 @@ fdImage: ossubdirs boot/bootsect boot/setup tools/build
 	nm -n vmkernel > system.map
 
 ossubdirs: $(patsubst %,_dir_%,$(SUBDIRS))
+
+cleansubdirs: $(patsubst %,_clean_%,$(SUBDIRS))
+
+$(patsubst %,_clean_%,$(SUBDIRS)):
+	make -C $(patsubst _clean_%,%,$@) clean
 
 $(patsubst %,_dir_%,$(SUBDIRS)): 
 	make -C $(patsubst _dir_%,%,$@)

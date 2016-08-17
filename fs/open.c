@@ -154,8 +154,13 @@ int sys_open(char * name)
 
 void proc_fd_init(struct proc * p)
 {
+	struct super_block * sb;
 	p->files.openfd=0;
 	p->files.maxopen=5;
+//	sb=get_super(1);
+//	if(!sb)
+//		panic("Get super block error");
+//	p->fs.root=sb->rootdir;
 	p->fs.root=super_block.rootdir;
 }
 

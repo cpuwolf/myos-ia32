@@ -9,6 +9,7 @@
 
 #include <type.h>
 #include <slot.h>
+#include <wait.h>
 
 /*hardware dependent struct*/
 struct boot_sector
@@ -122,6 +123,9 @@ struct super_block
 		unsigned  dir_first_sec;
 		unsigned  dir_number;	
 		unsigned  data_first_sec;
+		unsigned	char	lock;
+		int dev;
+		wait_queue_head_t	wait;
 		struct inode * rootdir;
 };
 

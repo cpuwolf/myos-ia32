@@ -121,6 +121,7 @@ extern void partition_check(struct partition_entry *);
 
 /*super.c*/
 extern void mount_fs(struct ide_drive *);
+extern struct super_block * get_super(int);
 
 /*open.c*/
 extern void fs_init();

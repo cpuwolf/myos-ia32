@@ -3,11 +3,11 @@
 *	2004/9/26
 */
 #include <type.h>
-#include <fs.h>
 #include <hd.h>
 #include <proto.h>
 #include <slot.h>
 #include <system.h>
+#include <fs.h>
 
 #define INODE_NR 20
 

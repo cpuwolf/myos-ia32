@@ -9,12 +9,12 @@
 #include <type.h>
 #include <const.h>
 #include <system.h>
-#include <wait.h>
 #include <proc.h>
 #include <proto.h>
 #include <glob.h>
 #include <section.h>
 #include <hd.h>
+#include <wait.h>
 
 static void do_request();
 
@@ -264,7 +264,7 @@ static void do_request(void)
 static int do_read(unsigned id,unsigned char * buf,int size,int block)
 {
 	unsigned int flags;
-	if(req_count>=BUF_SIZE)return 0;
+	if(req_count>=BUF_SIZE)return -1;
 	req_tail->block=block;
 	req_tail->count=(size>>9);
 	req_tail->buf=buf;
@@ -283,9 +283,8 @@ static int do_read(unsigned id,unsigned char * buf,int size,int block)
 /*kernel read*/
 int bread(void *buf,int size,int block)
 {
-	if(buf==NULL)return 0;
-    do_read(0,buf,size,block);
-    return 0;	
+	if(buf==NULL)return -1;
+    return do_read(0,buf,size,block);	
 }
 
 /*user interface function*/
