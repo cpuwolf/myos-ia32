@@ -3,10 +3,10 @@
 all: bootsect setup
 
 bootsect: bootsect.o
-	$(LD) $(LDFLAGS) -Ttext 0x0 -oformat binary -o $@ $<
+	$(LD) $(LDFLAGS) -Ttext 0x0 --oformat binary -o $@ $<
 
 setup: setup.o
-	$(LD) $(LDFLAGS) -Ttext 0x0 -oformat binary -o $@ $<
+	$(LD) $(LDFLAGS) -Ttext 0x0 --oformat binary -o $@ $<
 
 bootsect.s: bootsect.S
 
