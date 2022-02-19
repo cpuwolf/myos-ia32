@@ -94,7 +94,7 @@ void FASTCALL do_IRQ(int irq)
 }
 
 #define BUILD_IRQ(irq)\
-void hwint##irq##(); \
+void hwint##irq (); \
 __asm__("\n.globl hwint"#irq"\n"\
 		"hwint"#irq":\n\t"\
 		"pushl 	$"#irq"\n\t"\

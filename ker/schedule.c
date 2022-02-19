@@ -56,6 +56,7 @@ void schedule()
 			proc_block(curr);
 		default:
 		case TASK_RUNNING:
+			break;
 	}
 	curr->need_resched=0;	
 /*
@@ -108,7 +109,8 @@ void wake_up(wait_queue_head_t * head)
 	wait_queue_t * curr;
 	unsigned int flags;
 	if(!head)
-		goto out;
+		//goto out;
+		return;
 	lock_irq_save(flags);
 	he=&head->queue_list;
 	tmp=he->next;
@@ -120,7 +122,7 @@ void wake_up(wait_queue_head_t * head)
 		wake_up_process(p);
 	}
 	unlock_irq_restore(flags);
-out:	
+//out:
 }
 
 

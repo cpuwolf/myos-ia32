@@ -27,8 +27,10 @@
 #define memcpy(f,t,n) rep_movsb(((void *)f),((void *)t),(n))
 #define memset(s,c,num) rep_stosb((c),(s),(num))
 
+#define MYOS_INLINE  __attribute__((always_inline)) inline
+
 /*bytes copy*/
-extern inline void rep_movsb(void *from, void *to,int bytes)
+static MYOS_INLINE void rep_movsb(void *from, void *to,int bytes)
 {
 	int d0,d1,d2;
   	__asm__ __volatile__ (\
@@ -41,7 +43,7 @@ extern inline void rep_movsb(void *from, void *to,int bytes)
 
 
 /*memset*/
-extern inline void rep_stosb(int value,void * dest,int numwords)
+static MYOS_INLINE void rep_stosb(int value,void * dest,int numwords)
 {
 	int d1,d2;
 	__asm__ __volatile__(\
@@ -54,56 +56,56 @@ extern inline void rep_stosb(int value,void * dest,int numwords)
 
 
 
-extern inline unsigned char inb (unsigned short port)
+static MYOS_INLINE unsigned char inb (unsigned short port)
 {
   register unsigned char data;
   __asm__ __volatile__ ("inb %w1,%b0":"=a" (data):"d" (port));
   return data;
 }
 
-extern inline unsigned char imm_inb (unsigned short port)
+static MYOS_INLINE unsigned char imm_inb (unsigned short port)
 {
   register unsigned char data;
-  __asm__ __volatile__ ("inb %w1,%b0":"=a" (data):"ir" (port));
+  __asm__ __volatile__ ("inb %w1,%b0":"=a" (data):"d" (port));
   return data;
 }
 
-extern inline void outb(unsigned short port,unsigned char value)
+static MYOS_INLINE void outb(unsigned short port,unsigned char value)
 {
   __asm__ __volatile__ ("outb %1,%w0"::"d" (port),"a"(value));
 }
 
-extern inline void imm_outb(unsigned short port,unsigned char value)
+static MYOS_INLINE void imm_outb(unsigned short port,unsigned char value)
 {
   __asm__ __volatile__ ("outb %1,%w0"::"ir" (port),"a"(value));
 }
 
-extern inline unsigned short in_word (unsigned short port)
+static MYOS_INLINE unsigned short in_word (unsigned short port)
 {
   register unsigned short data;
   __asm__ __volatile__ ("inw %w1,%0":"=a" (data):"d" (port));
   return data;
 }
 
-extern inline void out_word (unsigned short port,unsigned short value)
+static MYOS_INLINE void out_word (unsigned short port,unsigned short value)
 {
   __asm__ __volatile__ ("outw %1,%w0"::"d" (port),"a"(value));
 }
 
 
-extern inline unsigned in_dword (unsigned short port)
+static MYOS_INLINE unsigned in_dword (unsigned short port)
 {
   register unsigned data;
   __asm__ __volatile__ ("inl %w1,%0":"=a" (data):"d" (port));
   return data;
 }
 
-extern inline void out_dword (unsigned short port,unsigned value)
+static MYOS_INLINE void out_dword (unsigned short port,unsigned value)
 {
   __asm__ __volatile__ ("outl %1,%w0"::"d" (port),"a"(value));
 }
 
-extern inline int find_zero_bit(unsigned int * p)
+static MYOS_INLINE int find_zero_bit(unsigned int * p)
 {
 	register unsigned int index=0;
 	__asm__ __volatile__(\
@@ -116,7 +118,7 @@ extern inline int find_zero_bit(unsigned int * p)
 	return index;
 }
 /*set nr bit in *p,*p is a 32-bit Unit*/
-extern inline void set_bit(unsigned int * p,int nr)
+static MYOS_INLINE void set_bit(unsigned int * p,int nr)
 {
 	__asm__ __volatile__(\
 	"btsl %1,%0"\
@@ -125,7 +127,7 @@ extern inline void set_bit(unsigned int * p,int nr)
 	);
 }
 /*reset nr bit in *p,*p is a 32-bit Unit*/
-extern inline void clear_bit(unsigned int * p,int nr)
+static MYOS_INLINE void clear_bit(unsigned int * p,int nr)
 {
 	__asm__ __volatile__(\
 	"btrl %1,%0"\
@@ -134,7 +136,7 @@ extern inline void clear_bit(unsigned int * p,int nr)
 	);
 }
 
-extern inline unsigned int do_cdiv(unsigned int s,unsigned int d)
+static MYOS_INLINE unsigned int do_cdiv(unsigned int s,unsigned int d)
 {
 	unsigned int q,r;
 	__asm__ __volatile__(\

@@ -119,7 +119,7 @@ void vsprintf(char * buf,const char * fmt, va_list args)
 						}
 						break;
 						
-				default:
+				//default:
 				}
 		}
 		*str=0;

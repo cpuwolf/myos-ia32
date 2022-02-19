@@ -39,7 +39,7 @@ clean: cleansubdirs
 	@rm -f fdImage vmsys system.map vmkernel
 
 fdImage: ossubdirs boot/bootsect boot/setup tools/build 
-	$(LD) $(LDFLAGS) -T ./k.ld head/head.o init/main.o\
+	$(LD) $(LDFLAGS) -T ./k.ld head/head.o init/main.o \
 	$(CORE_FILES) \
 	$(LIB_FILES) \
 	-o vmkernel
