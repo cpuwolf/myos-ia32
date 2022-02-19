@@ -97,10 +97,11 @@ void hd_bh()
 }
 static int command(struct ide_drive * wn,struct command * cmd)
 {
+	int disk_status = getstate(wn, 0xFF, 0xFF);
 	if(!getstate(wn,STATUS_BUSY|STATUS_READY|STATUS_ERR,STATUS_READY))
 	{
-		printk("controller not ready!\n");
-		return 0;
+		printk("IDE disk controller not ready! %d\n", disk_status);
+		//return 0;
 	}
 	outb(wn->base+REG_CONTROL,wn->ctl);
 	outb(wn->base+REG_LDH,0xa0|(cmd->device<<4)|cmd->head);/* select a device */
