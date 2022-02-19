@@ -58,7 +58,11 @@ $(patsubst %,_dir_%,$(SUBDIRS)):
 	make -C $(patsubst _dir_%,%,$@)
 	
 install: fdImage
-	dd if=fdImage of=/dev/fd0 
+	dd if=fdImage of=/dev/fd0
+
+vfd: fdImage
+	cp fdImage fdImage.vfd
+	truncate -s 1474560 fdImage.vfd
 
 
 
