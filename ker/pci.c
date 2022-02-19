@@ -171,8 +171,8 @@ static void __init pci_scan_device(struct pci_dev * temp)
 	dev->class=(class>>=8);
 	class>>=8;
 	dev->header_type=(type & 0x7F);
-	/*printk("PCI:found [0x%x/0x%x] b%d d%d f%d %x %x\n",\
-	dev->vendor,dev->deviceid,dev->bus,dev->device,dev->func,class,dev->header_type);*/
+	printk("PCI:found [0x%x/0x%x] b%d d%d f%d %x %x\n",\
+	dev->vendor,dev->deviceid,dev->bus,dev->device,dev->func,class,dev->header_type);
 	switch(dev->header_type)
 	{
 		case PCI_DEVICE_NORMAL:
