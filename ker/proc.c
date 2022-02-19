@@ -49,7 +49,7 @@ static void init_task()
 	int pid;
 	
 	fs_check();
-	printf("file check ok\n");
+	printf("file system check done\n\n");
 	file=fopen("ZT.COM");
 	if(file==-1)goto idle2;
 	while(!feof(file))
@@ -61,6 +61,7 @@ static void init_task()
 				printf("%c",*(buf+i));
 		}
 	}
+	printf("\n\n");
 	
 	memory();
 	if((pid=fork())<0)

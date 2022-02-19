@@ -36,7 +36,11 @@ int __ISR clock_handler(int irq)
 	bill_process_time();
 	unlock();
 	text_out(0,40,0x1e,"  T:%d s %d:%d:%d",clocktick,clocktime.hour,clocktime.min,clocktime.sec);
-	text_out(1,40,0x1e,"  %d0%d/%d/%d",clocktime.cen,clocktime.year,clocktime.mon,clocktime.day);
+	if(clocktime.cen < 10) {
+		text_out(1,40,0x1e,"  %d0%d/%d/%d",clocktime.cen,clocktime.year,clocktime.mon,clocktime.day);
+	} else {
+		text_out(1,40,0x1e,"  %d%d/%d/%d",clocktime.cen,clocktime.year,clocktime.mon,clocktime.day);
+	}
 	return 1;
 }
 static inline void get_cmos_time()
