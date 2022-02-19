@@ -6,7 +6,9 @@
 #ifndef _OS_STRING_H
 #define _OS_STRING_H
 
-extern inline char * strcpy(char * des,const char * src)
+#define MYOS_INLINE  __attribute__((always_inline)) inline
+
+static MYOS_INLINE char * strcpy(char * des,const char * src)
 {
 	int i,k;
 	char * j;
@@ -21,7 +23,7 @@ extern inline char * strcpy(char * des,const char * src)
 	return j;
 }
 
-extern inline int strcmp(const char * des,const char * src)
+static MYOS_INLINE int strcmp(const char * des,const char * src)
 {
 	int i,j,k;
 	__asm__ __volatile__(\

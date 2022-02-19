@@ -17,7 +17,7 @@ HPATH:=$(OSTOPDIR)/include
  
 export CC LD AS CPP HPATH OSTOPDIR AR
 
-CPPFLAGS:= -I$(HPATH) -m32 -march=i386
+CPPFLAGS:= -I$(HPATH) -m32 -march=i386 -fno-stack-protector -nostdlib -fno-hosted -fno-builtin -ffreestanding
 CFLAGS:= -Wall -O2 $(CPPFLAGS)
 LDFLAGS:= -m elf_i386
 AFLAGS:=  -I$(HPATH) --32 -march=i386
