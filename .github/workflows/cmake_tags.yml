@@ -1,0 +1,70 @@
+name: CMakeTags
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install OpenGL
+      run: |
+        sudo apt update
+        sudo apt-get install libncurses-dev gawk flex bison openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf
+      if: startsWith(matrix.os,'ubuntu')
+
+
+    - name: Build
+      # Build your program with the given configuration
+      run: make --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+
+    - name: Upload build
+      uses: actions/upload-artifact@v2
+      with:
+        name: buildoutput
+        path: ${{github.workspace}}/build
+
+  jbrelease:
+    needs: build
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Set enviroment for release
+      run: |
+        echo "RELEASE_TAG=v1.0.0" >> $GITHUB_ENV
+        echo "RELEASE_NAME=$GITHUB_WORKFLOW" >> $GITHUB_ENV
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+          name: buildoutput
+
+    - name: Upload to Release
+      uses: meeDamian/github-release@2.0
+      with:
+        # tag: ${{ env.RELEASE_TAG }}
+        draft: true
+        allow_override: true
+        gzip: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: >
+          fdImage.vfd
+
+

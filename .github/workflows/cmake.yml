@@ -1,0 +1,48 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ alive ]
+  pull_request:
+    branches: [ alive ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install OpenGL
+      run: |
+        sudo apt update
+        sudo apt install mesa-common-dev libglu1-mesa-dev freeglut3-dev
+      if: startsWith(matrix.os,'ubuntu')
+    
+    - name: Install USBlib
+      run: sudo apt-get install libudev-dev
+      if: startsWith(matrix.os,'ubuntu')
+
+
+    - name: Build
+      # Build your program with the given configuration
+      run: make --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+
+    - name: Upload build
+      uses: actions/upload-artifact@v2
+      with:
+        name: buildoutput
+        path: ${{github.workspace}}
