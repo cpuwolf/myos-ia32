@@ -33,14 +33,14 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration
-      run: make --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: make
 
 
     - name: Upload build
       uses: actions/upload-artifact@v2
       with:
         name: buildoutput
-        path: ${{github.workspace}}/build
+        path: ${{github.workspace}}
 
   jbrelease:
     needs: build

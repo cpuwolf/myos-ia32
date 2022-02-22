@@ -2,9 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ alive ]
+    branches: [ master ]
   pull_request:
-    branches: [ alive ]
+    branches: [ master ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -28,17 +28,13 @@ jobs:
     - name: Install OpenGL
       run: |
         sudo apt update
-        sudo apt install mesa-common-dev libglu1-mesa-dev freeglut3-dev
-      if: startsWith(matrix.os,'ubuntu')
-    
-    - name: Install USBlib
-      run: sudo apt-get install libudev-dev
+        sudo apt-get install libncurses-dev gawk flex bison openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf
       if: startsWith(matrix.os,'ubuntu')
 
 
     - name: Build
       # Build your program with the given configuration
-      run: make --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: make
 
 
     - name: Upload build
