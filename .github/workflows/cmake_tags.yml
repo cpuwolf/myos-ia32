@@ -1,4 +1,4 @@
-name: CMakeTags
+name: MakeTags
 
 on:
   push:
