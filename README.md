@@ -18,7 +18,7 @@ it was designed to run on my PentiumII PC when I was in college 2003~2005
 
 
 
-![action branch parameter](https://github.com/cpuwolf/myos-ia32/actions/workflows/cmake.yml/badge.svg?branch=master)
+![CI](https://github.com/cpuwolf/myos-ia32/actions/workflows/cmake.yml/badge.svg)
 
 
 # 2022 Feb. 19 wake up OS
