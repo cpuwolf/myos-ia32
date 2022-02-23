@@ -27,15 +27,15 @@ it was designed to run on my PentiumII PC when I was in college 2003~2005
 
 # Demo Video
 
-![https://www.bilibili.com/video/BV1YS4y1r77n](https://www.bilibili.com/video/BV1YS4y1r77n?share_source=copy_web)
+https://www.bilibili.com/video/BV1YS4y1r77n?share_source=copy_web
 
 # How to build
 
-![](https://github.com/cpuwolf/myos-ia32/wiki/Build-on-Ubuntu-18.04-x86_64)
+https://github.com/cpuwolf/myos-ia32/wiki/Build-on-Ubuntu-18.04-x86_64
 
 
 # How to run
 
-![](https://github.com/cpuwolf/myos-ia32/wiki/Run-OS-on-Oracle-VirtualBox)
+https://github.com/cpuwolf/myos-ia32/wiki/Run-OS-on-Oracle-VirtualBox
 
 
