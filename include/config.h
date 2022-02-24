@@ -6,5 +6,7 @@
 #define DEF_SYSSEG	0x1000
 #define DEF_SETUPSEG	0x9020
 
+#define SIG1	0xAA55
+#define SIG2	0x5A5A
 
 #endif

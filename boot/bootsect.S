@@ -1,6 +1,26 @@
 /*
 *	copyright(c)
 * 	wei shuai	2003/4
+
+* update below map on 2022 Feb. 25
+
+|--------------------| 0x07C00
+|       MBR          |
+|--------------------|
+|--------------------| 0x10000
+|       kernel       |
+|--------------------| 0x90000
+|     bootsector     |
+|--------------------| 0x90200
+|       setup        |
+|--------------------| 0x94000
+|       stack        |
+|--------------------| 0x98000
+
+disassemble bootsect binary file:
+
+> objdump -mi8086 -b binary -D boot/bootsect
+
 */
 
 #include <config.h>
@@ -12,7 +32,6 @@ SETUPSEG=DEF_SETUPSEG
 SYSSEG=DEF_SYSSEG
 
 #define	SETUPSECTS	1
-#define SIG1	0xAA55
 
 .globl _start
 .code16
@@ -105,8 +124,9 @@ load_next:
 
 	call	kill_motor
 /*check setup*/
-	#cmpw	$SIG1,%es($0x508)
-	#jne		bad_sig
+	movw $(508+512),%si
+	cmpw	$SIG1,(%si)
+	jne		gone_bad_setup
 
 /*After loaded setup&system ,we jump to the setup*/
 
@@ -222,7 +242,7 @@ kill_motor:
 	outb	%al,%dx
 	ret
 
-gone_not_support:
+gone_bad_setup:
 	pushw   %ax
     pushw   %bx
     movw    $0x0e44,%ax
