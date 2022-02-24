@@ -10,8 +10,7 @@ INITSEG=DEF_INITSEG
 SETUPSEG=DEF_SETUPSEG
 
 
-#define SIG1	0xAA55
-#define SIG2	0x5A5A
+
 
 .globl _start
 .code16
