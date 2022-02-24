@@ -28,19 +28,20 @@ void unbeep()
 {
 	outb(0x61,inb(0x61)|~3);
 }
-
+#define TEXT_COL 69
 int __ISR clock_handler(int irq)
 {
 	lock();
 	(*(unsigned long *)&clocktick)++;
 	bill_process_time();
 	unlock();
-	text_out(0,40,0x1e,"  T:%d s %d:%d:%d",clocktick,clocktime.hour,clocktime.min,clocktime.sec);
 	if(clocktime.cen < 10) {
-		text_out(1,40,0x1e,"  %d0%d/%d/%d",clocktime.cen,clocktime.year,clocktime.mon,clocktime.day);
+		text_out(0,TEXT_COL,0x1e,"  %d0%d/%d/%d",clocktime.cen,clocktime.year,clocktime.mon,clocktime.day);
 	} else {
-		text_out(1,40,0x1e,"  %d%d/%d/%d",clocktime.cen,clocktime.year,clocktime.mon,clocktime.day);
+		text_out(0,TEXT_COL,0x1e,"  %d%d/%d/%d",clocktime.cen,clocktime.year,clocktime.mon,clocktime.day);
 	}
+	text_out(1,TEXT_COL,0x1e,"  %d:%d:%d",clocktime.hour,clocktime.min,clocktime.sec);
+	text_out(2,TEXT_COL,0x1e,"  T:%d s",clocktick);
 	return 1;
 }
 static inline void get_cmos_time()
