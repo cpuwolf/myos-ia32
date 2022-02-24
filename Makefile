@@ -63,6 +63,7 @@ install: fdImage
 vfd: fdImage
 	cp fdImage fdImage.vfd
 	truncate -s 1474560 fdImage.vfd
+	cp fdImage.vfd fdImage.img
 
 
 
