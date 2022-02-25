@@ -129,6 +129,8 @@ gdt_table:      .word   4*8-1
 msg:	.ascii	"system setup check ok!"
 msgsig:	.ascii	"setup have been broken!:("
 msgswitch:	.ascii	"switch to protected mode"
+.org 506
+kernel_secs: .word	50
 .org 508
 sig1_check:	.word 	SIG1
 sig2_check:	.word	SIG2

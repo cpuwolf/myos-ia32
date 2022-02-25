@@ -107,15 +107,22 @@ load_next:
 	movw	$2,sector
 	movw	$(2-1),LBA
 	call	read_nsectors
-
+/* check setup */
+	movw	(508+512),%ax
+	cmpw	$SIG1,%ax
+	jne		gone_bad_setup
+/* get kernel size in sectors */
+	movw	(506+512),%ax
+	movw	%ax, nsectors
+	movw	%ax, Sectors
 /*now! we load system(just follow the setup)*/
 	movw    $SYSSEG,%ax
     movw    %ax,%es
 	movw	%ax, Segment
     xorw    %bx,%bx
 	movw	%bx, Offset
-	movw    $60,nsectors
-	movw    $60,Sectors
+	#movw    $60,nsectors #hard coded size
+	#movw    $60,Sectors #hard coded size
     movw    $0,head
     movw    $0,track
     movw    $(SETUPSECTS+2),sector
@@ -123,10 +130,7 @@ load_next:
     call    read_nsectors
 
 	call	kill_motor
-/*check setup*/
-	movw $(508+512),%si
-	cmpw	$SIG1,(%si)
-	jne		gone_bad_setup
+
 
 /*After loaded setup&system ,we jump to the setup*/
 
