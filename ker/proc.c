@@ -16,8 +16,8 @@ struct proc * current;
 struct proc * ready_head;
 struct proc * ready_tail;
 
-#define	IDLE_STACK	50 
-#define	INIT_STACK	512*5
+#define	IDLE_STACK	512
+#define	INIT_STACK	512*100
 
 static char userstack[IDLE_STACK+INIT_STACK];
 

@@ -114,8 +114,8 @@ load_next:
 	movw	%ax, Segment
     xorw    %bx,%bx
 	movw	%bx, Offset
-	movw    $50,nsectors
-	movw    $50,Sectors
+	movw    $60,nsectors
+	movw    $60,Sectors
     movw    $0,head
     movw    $0,track
     movw    $(SETUPSECTS+2),sector

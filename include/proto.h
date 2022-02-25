@@ -20,6 +20,7 @@
 void intel_init();
 void kb_init();
 void clock_init();
+void acpi_init();
 void hd_init();
 void pci_init();
 void mem_init();

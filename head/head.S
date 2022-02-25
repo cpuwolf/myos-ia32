@@ -13,7 +13,7 @@ start32:
 	movl	%eax,%ds
 	movl	%eax,%es
 	movl	%eax,%ss
-	movl	$0x9A000,%esp		/* init   segment reg 	*/
+	movl	$0x9F000,%esp		/* init   segment reg 	*/
 
 /*init bss memory zero*/
 	cld	

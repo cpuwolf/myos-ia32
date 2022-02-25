@@ -27,6 +27,7 @@ void __init start_kernel(void)
 		intr_init();/* i8259 interrupt init*/
 		printk("KITOS 1.0 Written By Wei Shuai\n");
 		intel_init();/* check cpu*/
+		acpi_init();
 		proc_init();
 		clock_init();/* 82C54 init*/
 		kb_init();
