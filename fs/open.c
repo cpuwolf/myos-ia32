@@ -76,7 +76,14 @@ struct inode * scan_dentry_buf(char * buf,int count,unsigned char * name)
 		if((((de+i)->u.l.attr&ATTR_LONG_NAME_MASK)!=ATTR_LONG_NAME)&&((de+i)->u.l.ord!=0xE5))
 		{
 			shortnamecopy((de+i)->u.s.name,filename);
+			//debug file system
 			printk("%s",filename);
+			if(((de+i)->u.s.attr&(ATTR_SUBDIR|ATTR_LABEL))==0x00)/*file*/
+				printk("\n");
+			else if(((de+i)->u.s.attr&(ATTR_SUBDIR|ATTR_LABEL))==ATTR_SUBDIR)/*dir*/
+				printk("/\n");
+			else if(((de+i)->u.s.attr&(ATTR_SUBDIR|ATTR_LABEL))==ATTR_LABEL)/*label*/
+				printk("<LABLE>\n");
 			if(!strcmp(filename,name))
 			{	
 				rip=get_inode();
@@ -89,12 +96,6 @@ struct inode * scan_dentry_buf(char * buf,int count,unsigned char * name)
 				strcpy(rip->name,filename);
 				return rip;
 			}
-			if(((de+i)->u.s.attr&(ATTR_SUBDIR|ATTR_LABEL))==0x00)/*file*/
-				printk("\n");
-			else if(((de+i)->u.s.attr&(ATTR_SUBDIR|ATTR_LABEL))==ATTR_SUBDIR)/*dir*/
-				printk("/\n");
-			else if(((de+i)->u.s.attr&(ATTR_SUBDIR|ATTR_LABEL))==ATTR_LABEL)/*label*/
-				printk("<LABLE>\n");	
 		}
 		/*else found long name 
 		{
