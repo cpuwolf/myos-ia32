@@ -4,7 +4,7 @@ MultiTask Operating System Running on single core IA32 processor Intel PentiumII
 it was designed to run on my PentiumII PC when I was in college 2003~2005
 
 
-[![Ubuntu](https://github.com/cpuwolf/myos-ia32/actions/workflows/cmake_tags.yml/badge.svg)](https://github.com/cpuwolf/myos-ia32/actions/workflows/cmake_tags.yml)
+![CI](https://github.com/cpuwolf/myos-ia32/actions/workflows/cmake_tags.yml/badge.svg)
 
 * supports IA32 only
 * single core OS
@@ -21,7 +21,7 @@ it was designed to run on my PentiumII PC when I was in college 2003~2005
 
 
 
-![CI](https://github.com/cpuwolf/myos-ia32/actions/workflows/cmake.yml/badge.svg)
+
 
 
 # 2022 Feb. 19 wake up OS
