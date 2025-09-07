@@ -54,7 +54,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v5
       with:
-        path: ${{ env.RUNNER_TEMP }}
+        path: ${{ runner.temp }}
         name: buildoutput
 
     - name: Upload to Release
@@ -66,6 +66,6 @@ jobs:
         gzip: false
         token: ${{ secrets.GITHUB_TOKEN }}
         files: >
-          ${{ env.RUNNER_TEMP }}/fdImage.vfd
+          ${{ runner.temp }}/fdImage.vfd
 
 
