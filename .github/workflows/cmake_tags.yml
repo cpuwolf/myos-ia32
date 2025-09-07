@@ -50,6 +50,8 @@ jobs:
       run: |
         echo "RELEASE_TAG=v1.0.0" >> $GITHUB_ENV
         echo "RELEASE_NAME=$GITHUB_WORKFLOW" >> $GITHUB_ENV
+        echo ::set-env name=RELEASE_TAG::"v1.0.0"
+        echo ::set-env name=RELEASE_NAME::"$GITHUB_WORKFLOW"
 
     - name: Download artifact
       uses: actions/download-artifact@v5
@@ -70,6 +72,6 @@ jobs:
         gzip: false
         token: ${{ secrets.GITHUB_TOKEN }}
         files: >
-          ${{ runner.temp }}/fdImage.vfd
+          fdImage.vfd:${{ runner.temp }}/fdImage.vfd
 
 
