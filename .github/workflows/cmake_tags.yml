@@ -59,6 +59,7 @@ jobs:
 
     - name: list temp folder
       run: |
+        echo $RUNNER_TEMP
         ls $RUNNER_TEMP
 
     - name: Upload to Release
