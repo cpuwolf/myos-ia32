@@ -61,6 +61,7 @@ jobs:
       run: |
         echo $RUNNER_TEMP
         ls $RUNNER_TEMP
+        cp -f $RUNNER_TEMP/fdImage.vfd $GITHUB_WORKSPACE/
 
     - name: Upload to Release
       uses: meeDamian/github-release@2.0
@@ -71,6 +72,6 @@ jobs:
         gzip: false
         token: ${{ secrets.GITHUB_TOKEN }}
         files: >
-          fdImage.vfd:${{ runner.temp }}/fdImage.vfd
+          fdImage.vfd
 
 
